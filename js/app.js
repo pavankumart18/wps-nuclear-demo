@@ -576,7 +576,7 @@ function fld(label, value, highlight=false, source='', tooltip='') {
   const needsReview = S.wpsRecord?.extraction_review_required;
   const confBadge = needsReview
     ? `<span class="field-conf-badge" style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(245,158,11,.12);color:#f59e0b;font-family:var(--mono);margin-left:4px">⚠ ${confPct}%</span>`
-    : `<span class="field-conf-badge" style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(56,189,248,.1);color:#38bdf8;font-family:var(--mono);margin-left:4px">${confPct}%</span>`;
+    : `<span class="field-conf-badge" style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(2,132,199,.1);color:#0284c7;font-family:var(--mono);margin-left:4px">${confPct}%</span>`;
   return `
     <div class="field-row"${tip}>
       <div class="field-label">${esc(label)}</div>
@@ -1059,18 +1059,18 @@ function renderExecutionTicket() {
             <div style="font-size:9px;color:var(--dim);margin-top:2px">ASME Sec IX / IS 2825</div>
           </div>
           <!-- QR placeholder -->
-          <div style="margin-top:8px;width:44px;height:44px;border:1px solid #1e3352;border-radius:3px;margin-left:auto;background:#0d1829;display:flex;align-items:center;justify-content:center">
-            <svg viewBox="0 0 20 20" width="36" height="36" style="opacity:.4">
-              <rect x="1" y="1" width="7" height="7" fill="none" stroke="#38bdf8" stroke-width="1"/>
-              <rect x="2" y="2" width="5" height="5" fill="#38bdf8"/>
-              <rect x="12" y="1" width="7" height="7" fill="none" stroke="#38bdf8" stroke-width="1"/>
-              <rect x="13" y="2" width="5" height="5" fill="#38bdf8"/>
-              <rect x="1" y="12" width="7" height="7" fill="none" stroke="#38bdf8" stroke-width="1"/>
-              <rect x="2" y="13" width="5" height="5" fill="#38bdf8"/>
-              <rect x="12" y="12" width="2" height="2" fill="#38bdf8"/>
-              <rect x="15" y="12" width="2" height="2" fill="#38bdf8"/>
-              <rect x="12" y="15" width="2" height="4" fill="#38bdf8"/>
-              <rect x="15" y="15" width="4" height="2" fill="#38bdf8"/>
+          <div style="margin-top:8px;width:44px;height:44px;border:1px solid #cbd5e1;border-radius:3px;margin-left:auto;background:#f8fafc;display:flex;align-items:center;justify-content:center">
+            <svg viewBox="0 0 20 20" width="36" height="36" style="opacity:.75">
+              <rect x="1" y="1" width="7" height="7" fill="none" stroke="#0f172a" stroke-width="1"/>
+              <rect x="2" y="2" width="5" height="5" fill="#0f172a"/>
+              <rect x="12" y="1" width="7" height="7" fill="none" stroke="#0f172a" stroke-width="1"/>
+              <rect x="13" y="2" width="5" height="5" fill="#0f172a"/>
+              <rect x="1" y="12" width="7" height="7" fill="none" stroke="#0f172a" stroke-width="1"/>
+              <rect x="2" y="13" width="5" height="5" fill="#0f172a"/>
+              <rect x="12" y="12" width="2" height="2" fill="#0f172a"/>
+              <rect x="15" y="12" width="2" height="2" fill="#0f172a"/>
+              <rect x="12" y="15" width="2" height="4" fill="#0f172a"/>
+              <rect x="15" y="15" width="4" height="2" fill="#0f172a"/>
             </svg>
           </div>
         </div>
@@ -1244,7 +1244,7 @@ function renderExecutionTicket() {
         </div>
 
         <!-- Compliance footer -->
-        <div style="margin-top:16px;padding:10px 14px;background:#0d1829;border:1px solid #1e3352;border-radius:4px;font-family:var(--mono);font-size:9px;color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div style="margin-top:16px;padding:10px 14px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;font-family:var(--mono);font-size:9px;color:#475569;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
           <span>Ref: ASME Sec IX · QW-301 · IS 2825 · NPCIL-QOP-WLD-001</span>
           <span>User must verify drawing/spec suitability and obtain WPS acceptance approval before use in production</span>
           <span style="color:var(--accent)">WeldAssign AI · ${dcn} · WA-GEN-R00</span>
@@ -1610,26 +1610,26 @@ function buildWPSPage3(w) {
       <div class="wps-doc-section" style="margin-top:10px">
         <div class="wps-doc-section-hdr">Joint Schematic</div>
         <svg viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:260px;margin:4px auto;display:block">
-          <rect width="200" height="80" fill="#172136" rx="3"/>
+          <rect width="200" height="80" fill="#f0f4f8" rx="3"/>
           <!-- Base metal left -->
-          <rect x="8" y="30" width="60" height="20" fill="#1e3a5f" stroke="#3d6a9e" stroke-width="1"/>
+          <rect x="8" y="30" width="60" height="20" fill="#bfdbfe" stroke="#60a5fa" stroke-width="1"/>
           <!-- Base metal right -->
-          <rect x="132" y="30" width="60" height="20" fill="#1e3a5f" stroke="#3d6a9e" stroke-width="1"/>
+          <rect x="132" y="30" width="60" height="20" fill="#bfdbfe" stroke="#60a5fa" stroke-width="1"/>
           <!-- Groove left bevel -->
-          <polygon points="68,30 80,50 68,50" fill="#253348" stroke="#3d6a9e" stroke-width="1"/>
+          <polygon points="68,30 80,50 68,50" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
           <!-- Groove right bevel -->
-          <polygon points="132,30 120,50 132,50" fill="#253348" stroke="#3d6a9e" stroke-width="1"/>
+          <polygon points="132,30 120,50 132,50" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
           <!-- Weld root -->
-          <ellipse cx="100" cy="50" rx="8" ry="4" fill="rgba(56,189,248,.25)" stroke="#38bdf8" stroke-width="1"/>
+          <ellipse cx="100" cy="50" rx="8" ry="4" fill="rgba(2,132,199,.2)" stroke="#0284c7" stroke-width="1"/>
           <!-- Pass labels -->
-          <text x="100" y="42" text-anchor="middle" font-size="7" fill="#38bdf8" font-family="monospace">ROOT</text>
-          <text x="100" y="28" text-anchor="middle" font-size="7" fill="#94a3b8" font-family="monospace">CAP</text>
+          <text x="100" y="42" text-anchor="middle" font-size="7" fill="#0369a1" font-family="monospace">ROOT</text>
+          <text x="100" y="28" text-anchor="middle" font-size="7" fill="#475569" font-family="monospace">CAP</text>
           <!-- arrows -->
           <line x1="100" y1="58" x2="100" y2="72" stroke="#64748b" stroke-width="1" marker-end="url(#arr)"/>
           <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
             <path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/>
           </marker></defs>
-          <text x="100" y="78" text-anchor="middle" font-size="6" fill="#64748b" font-family="monospace">VERTICAL UPHILL</text>
+          <text x="100" y="78" text-anchor="middle" font-size="6" fill="#475569" font-family="monospace">VERTICAL UPHILL</text>
         </svg>
       </div>
 
@@ -1686,10 +1686,10 @@ function buildThumbContent(page) {
       ${[1,2,3].map(i => `<div class="pdf-thumb-data-row">
         ${[1,2,3,4,5,6].map(j => `<div class="pdf-thumb-data-cell${(i===1&&j===2)||(i===2&&j===4)||(i===3&&j===1)?' hi':''}"></div>`).join('')}
       </div>`).join('')}
-      <div style="margin-top:4px;height:20px;background:#172136;border:1px solid #253348;border-radius:2px">
+      <div style="margin-top:4px;height:20px;background:#f0f4f8;border:1px solid #e2e8f0;border-radius:2px">
         <svg viewBox="0 0 60 15" style="width:100%;height:100%">
-          <polygon points="15,2 20,13 10,13" fill="none" stroke="#38bdf8" stroke-width="1"/>
-          <polygon points="45,2 50,13 40,13" fill="none" stroke="#38bdf8" stroke-width="1"/>
+          <polygon points="15,2 20,13 10,13" fill="none" stroke="#0284c7" stroke-width="1"/>
+          <polygon points="45,2 50,13 40,13" fill="none" stroke="#0284c7" stroke-width="1"/>
         </svg>
       </div>
     </div>`;
