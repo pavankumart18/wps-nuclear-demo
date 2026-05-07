@@ -1,0 +1,39 @@
+wps_id,pass_type,welding_process,filler_specification,filler_class,filler_size_mm,polarity,amps_min,amps_max,volts_min,volts_max,travel_speed_min_mm_min,travel_speed_max_mm_min,shielding_gas,backing_gas,cleaning_method,preheat_method,notes
+WPS-001,Root,SMAW,SFA 5.1,E-7018 or E7018-1,2.5,DC-EP,70,100,22,40,40,80,NA,NA,Brushing or Grinding; joint dry prior to welding,"With or without, as applicable",Extracted from NPCIL-STD-SM-11 page 3 table.
+WPS-001,1st,SMAW,SFA 5.1,E-7018 or E7018-1,2.5,DC-EP,70,100,22,40,40,80,NA,NA,Brushing or Grinding; joint dry prior to welding,"With or without, as applicable",Extracted from NPCIL-STD-SM-11 page 3 table.
+WPS-001,2nd,SMAW,SFA 5.1,E-7018 or E7018-1,3.15,DC-EP,100,140,22,40,40,80,NA,NA,Brushing or Grinding; joint dry prior to welding,"With or without, as applicable",Extracted from NPCIL-STD-SM-11 page 3 table.
+WPS-001,3rd,SMAW,SFA 5.1,E-7018 or E7018-1,3.15,DC-EP,100,140,22,40,40,80,NA,NA,Brushing or Grinding; joint dry prior to welding,"With or without, as applicable",Extracted from NPCIL-STD-SM-11 page 3 table.
+WPS-001,Balance,SMAW,SFA 5.1,E-7018 or E7018-1,4.0,DC-EP,150,190,22,40,40,80,NA,NA,Brushing or Grinding; joint dry prior to welding,"With or without, as applicable",Extracted from NPCIL-STD-SM-11 page 3 table.
+WPS-002,Root,SMAW,5.1,E-7018,3.15,DC-EP,60,190,18,30,40,80,NA,NA,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-002,Fill,SMAW,5.1,E-7018,3.15,DC-EP,60,100,10,20,40,80,NA,NA,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-002,Cap,SMAW,5.1,E-7018,3.15,DC-EP,60,140,18,20,40,80,NA,NA,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-003,Root,GTAW,5.18,ER70S-2,2.4,DC-EN,60,140,18,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-003,Fill,GTAW,5.18,ER70S-2,2.4,DC-EN,80,140,22,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-003,Cap,GTAW,5.18,ER70S-2,2.4,DC-EN,80,140,18,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-004,Root,SMAW,5.4,E308L-16,3.15,DC-EP,60,140,18,20,40,80,NA,NA,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-004,Fill,SMAW,5.4,E308L-16,3.15,DC-EP,70,140,22,30,40,80,NA,NA,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-004,Cap,SMAW,5.4,E308L-16,3.15,DC-EP,70,100,22,30,40,80,NA,NA,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-005,Root,GTAW,5.9,ER308L,2.4,DC-EN,70,190,18,40,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-005,Fill,GTAW,5.9,ER308L,2.4,DC-EN,80,140,18,20,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-005,Cap,GTAW,5.9,ER308L,2.4,DC-EN,60,100,18,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-006,Root,SMAW,5.4,E309L-16,3.15,DC-EP,80,140,18,30,40,80,NA,NA,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-006,Fill,SMAW,5.4,E309L-16,3.15,DC-EP,80,100,18,20,40,80,NA,NA,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-006,Cap,SMAW,5.4,E309L-16,3.15,DC-EP,80,100,18,20,40,80,NA,NA,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-007,Root,GTAW,5.9,ER309L,2.4,DC-EN,70,140,22,40,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-007,Fill,GTAW,5.9,ER309L,2.4,DC-EN,55,140,18,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-007,Cap,GTAW,5.9,ER309L,2.4,DC-EN,55,120,10,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-008,Root,GTAW,5.18+5.1,ER70S-2 + E7018,3.15,DC-EN,55,100,10,40,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-008,Fill,GTAW,5.18+5.1,ER70S-2 + E7018,3.15,DC-EN,70,100,22,20,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-008,Cap,GTAW,5.18+5.1,ER70S-2 + E7018,3.15,DC-EN,60,190,18,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-009,Root,GTAW,5.18+5.1,ER70S-2 + E7018,3.15,DC-EN,70,140,10,40,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-009,Fill,GTAW,5.18+5.1,ER70S-2 + E7018,3.15,DC-EN,55,140,10,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-009,Cap,GTAW,5.18+5.1,ER70S-2 + E7018,3.15,DC-EN,60,140,10,40,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-010,Root,GTAW,5.14,ERNiCr-3,2.4,DC-EN,70,140,22,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-010,Fill,GTAW,5.14,ERNiCr-3,2.4,DC-EN,55,160,18,40,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-010,Cap,GTAW,5.14,ERNiCr-3,2.4,DC-EN,60,100,18,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-011,Root,GTAW,5.28+5.5,ER90S-B3 + E9018-B3,3.15,DC-EN,70,160,10,40,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-011,Fill,GTAW,5.28+5.5,ER90S-B3 + E9018-B3,3.15,DC-EN,70,120,10,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-011,Cap,GTAW,5.28+5.5,ER90S-B3 + E9018-B3,3.15,DC-EN,60,100,10,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-012,Root,GTAW,NA,Autogenous,NA,DC-EN,60,140,22,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-012,Fill,GTAW,NA,Autogenous,NA,DC-EN,70,160,10,40,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.
+WPS-012,Cap,GTAW,NA,Autogenous,NA,DC-EN,60,140,22,30,40,80,99.95% Argon,99.95% Argon,Brushing or Grinding,As WPS,Synthetic supporting pass parameter row.

@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python server.py)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/index.html)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/css/app.css)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/js/app.js)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/npcil_sm11_demo_input_data/jobs.csv)",
+      "Bash(curl -s http://localhost:8080/js/matching.js)",
+      "Bash(curl -s http://localhost:8080/js/data.js)",
+      "Bash(curl -s http://localhost:8080/npcil_sm11_demo_input_data/welders.csv)",
+      "Bash(curl -s -o /dev/null -w \"index.html: %{http_code}\\\\n\" http://localhost:8080/index.html)",
+      "Bash(curl -s -o /dev/null -w \"app.css: %{http_code}\\\\n\" http://localhost:8080/css/app.css)",
+      "Bash(curl -s -o /dev/null -w \"data.js: %{http_code}\\\\n\" http://localhost:8080/js/data.js)",
+      "Bash(curl -s -o /dev/null -w \"matching.js: %{http_code}\\\\n\" http://localhost:8080/js/matching.js)",
+      "Bash(curl -s -o /dev/null -w \"app.js: %{http_code}\\\\n\" http://localhost:8080/js/app.js)",
+      "Bash(python gen_data.py)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(node -e ' *)",
+      "Bash(node --check \"C:\\\\Users\\\\admin\\\\Desktop\\\\WPS Nuclear\\\\js\\\\app.js\")",
+      "Bash(node *)",
+      "Bash(dir \"C:\\\\Users\\\\admin\\\\Desktop\\\\WPS Nuclear\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\admin\\\\Desktop\\\\WPS Nuclear\\\\js\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\admin\\\\Desktop\\\\WPS Nuclear\\\\css\" /b)",
+      "Bash(Get-ChildItem -Name)"
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+welder_id,welder_name,shift,availability_status,home_location,active_ticket_ids,continuity_status,qualification_expiry_date,days_until_expiry,last_qualified_weld_date,recent_quality_flag,recent_ncr_count,supervisor_note,employment_status
+W-104,Maria Chen,A,Available,Bay 1,Q-SM11-SMAW-P1P1-ALL-FR,Active,2026-12-15,231,2026-04-10,None,0,Preferred main demo welder; clean full-range SM-11 match,Active
+W-117,David Patel,A,Available,Bay 2,Q-SM11-SMAW-P1P1-LR-8MM,Active,2026-07-30,93,2026-04-05,None,0,Limited range; should fail 12 mm SM-11 but pass 6 mm case,Active
+W-132,Lee Morgan,A,Available,Bay 1,Q-SM11-SMAW-P1P1-3G-ONLY,Active,2026-11-02,188,2026-04-14,None,0,3G-only; rejected for 6G/5G job,Active
+W-145,Aisha Khan,A,Available,Bay 2,Q-SM11-GTAW-P1P1-ALL|Q-GT11-GTAW-P1P1-ALL,Active,2026-10-18,173,2026-04-01,None,0,Strong GTAW welder; wrong process for SMAW job,Active
+W-153,Omar Ruiz,A,Available,Bay 1,Q-SM11-SMAW-P1P1-ALL-FR,At risk,2026-05-05,7,2025-12-15,None,0,Technically eligible but continuity/expiry warning,Active
+W-166,Ethan Brooks,B,Unavailable for Shift A,Bay 3,Q-SM11-SMAW-P1P1-ALL-FR,Active,2026-09-20,145,2026-04-18,None,0,Qualified but not available on Shift A,Active
+W-171,Nora Singh,A,Available,Bay 2,Q-SM11-SMAW-P1P1-ALL-FR,Expired,2026-03-12,-47,2025-10-01,None,0,Expired qualification despite good technical ticket,Active
+W-184,Priya Nair,A,Available,Bay 2,Q-SM88-SMAW-P8P8-ALL,Active,2026-12-01,217,2026-04-11,None,0,"Stainless SMAW, material mismatch for SM-11",Active
+W-190,Jon Miller,A,Available,Bay 1,Q-SM11-SMAW-P1P1-ALL-FR|Q-GT11-GTAW-P1P1-ALL,Active,2026-08-12,106,2026-04-20,Recent minor NCR,1,Multi-process welder; ranked below Maria because recent quality flag,Active
+W-198,Sara Lopez,C,Available,Bay 3,Q-GTSM11-DUAL-P1P1-ALL,Active,2027-01-15,262,2026-04-12,None,0,Dual-process eligible but wrong shift for Shift A,Active
+W-201,Adrian Cole,B,Available,Bay 3,Q-SM11-GTAW-P1P1-ALL,At risk,2026-05-18,20,2026-03-08,None,0,Synthetic welder profile for ranking and edge cases,Active
+W-202,Mina Rao,A,Available,Field Maintenance,Q-SYN-027,Active,2026-05-03,5,2026-02-28,Consumable traceability note,0,Synthetic welder profile for ranking and edge cases,Active
+W-203,Elias Stone,B,Unavailable,QA Hold Area,Q-SYN-029,Active,2026-05-03,5,2025-11-15,Recent minor NCR,0,Synthetic welder profile for ranking and edge cases,Active
+W-204,Fatima Ali,C,Available,Bay 2,Q-SYN-013,Expired,2026-04-18,-10,2025-10-29,None,0,Synthetic welder profile for ranking and edge cases,Active
+W-205,Noah Wright,B,Available,Bay 3,Q-SYN-014|Q-SYN-026,Active,2026-05-03,5,2025-11-08,Consumable traceability note,0,Synthetic welder profile for ranking and edge cases,Active
+W-206,Ivy Zhang,C,Available,Module Shop,Q-SM11-SMAW-P1P1-LR-8MM,At risk,2026-12-24,240,2026-03-02,None,2,Synthetic welder profile for ranking and edge cases,Inactive
+W-207,Carlos Mendes,B,On leave,Bay 2,Q-SM11-SMAW-P1P1-FLAT,At risk,2027-06-02,400,2025-08-30,None,0,Synthetic welder profile for ranking and edge cases,Active
+W-208,Keiko Tanaka,B,Available,Module Shop,Q-SM11-GTAW-P1P1-ALL,Active,2026-12-24,240,2026-03-22,None,2,Synthetic welder profile for ranking and edge cases,Active
+W-209,Ravi Menon,A,Training,Field Maintenance,Q-SYN-034,Active,2026-08-26,120,2026-01-04,Recent minor NCR,1,Synthetic welder profile for ranking and edge cases,Active
+W-210,Lena Hoffmann,A,Training,Module Shop,Q-SM88-SMAW-P8P8-ALL,At risk,2026-05-03,5,2026-01-30,None,1,Synthetic welder profile for ranking and edge cases,Active
+W-211,Samir Das,A,Unavailable,Bay 3,Q-SYN-013,Active,2026-12-24,240,2026-01-25,Consumable traceability note,0,Synthetic welder profile for ranking and edge cases,Active
+W-212,Olivia Green,B,Available,Module Shop,Q-SM11-SMAW-P1P1-FLAT,Active,2026-05-18,20,2025-11-18,Recent minor NCR,2,Synthetic welder profile for ranking and edge cases,Active
+W-213,Ben Carter,B,Unavailable,Module Shop,Q-SYN-031|Q-SYN-014,At risk,2026-08-26,120,2025-09-25,Recent minor NCR,0,Synthetic welder profile for ranking and edge cases,Active
+W-214,Yara Haddad,C,Unavailable,QA Hold Area,Q-SYN-022|Q-SYN-026,At risk,2026-05-03,5,2026-03-08,None,0,Synthetic welder profile for ranking and edge cases,Active
+W-215,Victor Chen,B,Available,Bay 1,Q-SYN-024,At risk,2026-06-27,60,2026-01-15,None,1,Synthetic welder profile for ranking and edge cases,Active
+W-216,Rina Shah,A,Available,Bay 2,Q-SYN-033|Q-SYN-020,Active,2026-08-26,120,2025-12-10,Recent minor NCR,0,Synthetic welder profile for ranking and edge cases,Active
+W-217,Thomas Beck,A,Available,Bay 1,Q-SM11-SMAW-P1P1-LR-8MM,At risk,2026-06-27,60,2026-01-03,None,0,Synthetic welder profile for ranking and edge cases,Active
+W-218,Amara Okafor,A,Training,Module Shop,Q-GT11-GTAW-P1P1-ALL,Expired,2026-04-18,-10,2025-12-12,None,0,Synthetic welder profile for ranking and edge cases,Active
+W-219,Paul Singh,B,Available,Bay 3,Q-SM88-SMAW-P8P8-ALL,Expired,2026-02-27,-60,2025-12-02,Consumable traceability note,2,Synthetic welder profile for ranking and edge cases,Active
+W-220,Julia Novak,B,Training,QA Hold Area,Q-SYN-035,At risk,2026-05-18,20,2025-11-14,None,0,Synthetic welder profile for ranking and edge cases,Active
+W-221,Kenji Mori,B,On leave,Bay 2,Q-SM11-SMAW-P1P1-ALL-PWHT,Expired,2026-04-18,-10,2026-04-18,Consumable traceability note,0,Synthetic welder profile for ranking and edge cases,Active
+W-222,Grace Lee,B,Available,Bay 1,Q-SYN-034,Active,2026-08-26,120,2026-04-01,None,0,Synthetic welder profile for ranking and edge cases,Active
+W-223,Hugo Silva,C,Available,Bay 1,Q-SYN-017,Active,2026-06-27,60,2025-11-10,Consumable traceability note,2,Synthetic welder profile for ranking and edge cases,Active
+W-224,Tara Williams,B,On leave,QA Hold Area,Q-SYN-035,At risk,2026-06-27,60,2025-08-26,None,2,Synthetic welder profile for ranking and edge cases,Terminated
+W-225,Mateo Garcia,B,Unavailable,Field Maintenance,Q-SYN-025|Q-SYN-024,Expired,2026-04-18,-10,2025-12-05,Consumable traceability note,2,Synthetic welder profile for ranking and edge cases,Active
+W-226,Elena Petrova,C,On leave,Bay 1,Q-SYN-015,At risk,2026-05-03,5,2025-09-17,Consumable traceability note,0,Synthetic welder profile for ranking and edge cases,Active
+W-227,Arun Iyer,B,Unavailable,Bay 2,Q-SM11-SMAW-P1P1-LR-8MM,At risk,2026-06-27,60,2026-02-26,None,0,Synthetic welder profile for ranking and edge cases,Inactive
+W-228,Maya Brooks,B,On leave,Module Shop,Q-SYN-035|Q-SYN-032,Active,2026-12-24,240,2026-04-03,None,0,Synthetic welder profile for ranking and edge cases,Active
+W-229,Felix Grant,C,Unavailable,QA Hold Area,Q-SYN-025|Q-SYN-032,At risk,2026-12-24,240,2025-08-25,Consumable traceability note,0,Synthetic welder profile for ranking and edge cases,Active
+W-230,Nina Patel,A,Available,Field Maintenance,Q-SM11-SMAW-P1P1-FLAT|Q-GTSM11-DUAL-P1P1-ALL,At risk,2026-06-27,60,2026-01-04,Recent minor NCR,0,Synthetic welder profile for ranking and edge cases,Active
+W-231,Rafael Costa,C,Available,QA Hold Area,Q-SM11-SMAW-P1P1-FLAT,Expired,2026-04-18,-10,2026-03-07,Consumable traceability note,2,Synthetic welder profile for ranking and edge cases,Active
+W-232,Aya Kim,B,Available,Bay 2,Q-GT11-GTAW-P1P1-NO-BACKING-GAS,Active,2026-05-03,5,2025-11-05,None,1,Synthetic welder profile for ranking and edge cases,Terminated
+W-233,George Smith,C,Unavailable,Bay 3,Q-SYN-018,Expired,2026-04-18,-10,2025-11-17,Recent minor NCR,0,Synthetic welder profile for ranking and edge cases,Active
+W-234,Mei Lin,A,Available,Bay 2,Q-SYN-025|Q-SYN-033,Active,2026-12-24,240,2026-04-08,None,0,Synthetic welder profile for ranking and edge cases,Inactive
+W-235,Kiran Rao,A,Available,Module Shop,Q-SYN-035,Active,2026-08-26,120,2025-08-26,Recent minor NCR,1,Synthetic welder profile for ranking and edge cases,Active
+W-236,Anika Bose,B,Training,Bay 3,Q-SYN-024,Active,2026-05-03,5,2026-02-09,Recent minor NCR,0,Synthetic welder profile for ranking and edge cases,Active
+W-237,Daniel Park,C,Unavailable,Field Maintenance,Q-SYN-015,At risk,2026-05-18,20,2026-03-03,None,0,Synthetic welder profile for ranking and edge cases,Active
+W-238,Leah Martin,B,On leave,Bay 1,Q-GT11-GTAW-P1P1-NO-BACKING-GAS,At risk,2027-06-02,400,2025-08-27,None,0,Synthetic welder profile for ranking and edge cases,Active
+W-239,Farah Khan,B,Training,Bay 1,Q-SYN-033,Active,2026-05-18,20,2025-09-03,Consumable traceability note,0,Synthetic welder profile for ranking and edge cases,Active
+W-240,Marco Rossi,A,Unavailable,Bay 1,Q-SM11-SMAW-P1P1-LR-8MM,Active,2026-12-24,240,2026-02-18,None,0,Synthetic welder profile for ranking and edge cases,Active

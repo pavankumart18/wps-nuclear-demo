@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeldAssign AI — The Business Case</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #0a0f1e;
+      --bg2:       #0f172a;
+      --surface:   #1e293b;
+      --surface-hi:#253448;
+      --border:    rgba(56,189,248,.12);
+      --accent:    #38bdf8;
+      --accent2:   #818cf8;
+      --green:     #22c55e;
+      --amber:     #f59e0b;
+      --red:       #ef4444;
+      --text:      #f1f5f9;
+      --muted:     #94a3b8;
+      --dim:       #64748b;
+      --mono:      'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    /* ── Nav ── */
+    .story-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(10,15,30,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 56px;
+    }
+    .story-nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; font-weight: 700; color: var(--accent);
+      letter-spacing: -.2px;
+    }
+    .story-nav-logo svg { width: 20px; height: 20px; stroke: var(--accent); }
+    .story-nav-links { display: flex; gap: 24px; }
+    .story-nav-links a {
+      font-size: 12px; font-weight: 500; color: var(--muted);
+      text-decoration: none; letter-spacing: .3px;
+      transition: color .2s;
+    }
+    .story-nav-links a:hover { color: var(--text); }
+    .story-nav-cta {
+      background: var(--accent); color: #0f172a;
+      padding: 7px 18px; border-radius: 6px;
+      font-size: 13px; font-weight: 700;
+      text-decoration: none; transition: opacity .2s;
+    }
+    .story-nav-cta:hover { opacity: .85; }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; text-align: center;
+      padding: 80px 40px 60px;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(56,189,248,.08) 0%, transparent 70%);
+    }
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px;
+      color: var(--accent); text-transform: uppercase; margin-bottom: 20px;
+    }
+    .hero-title {
+      font-size: clamp(36px, 6vw, 72px); font-weight: 900;
+      line-height: 1.08; letter-spacing: -2px;
+      margin-bottom: 24px; max-width: 900px;
+    }
+    .hero-title span { color: var(--accent); }
+    .hero-sub {
+      font-size: 18px; color: var(--muted); max-width: 640px;
+      line-height: 1.65; margin-bottom: 48px;
+    }
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-hero-primary {
+      background: var(--accent); color: #0a0f1e;
+      padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 700;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-hero-primary:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-hero-secondary {
+      border: 1px solid var(--border); color: var(--muted);
+      padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 500;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-hero-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Metrics strip ── */
+    .metrics-strip {
+      display: flex; justify-content: center; gap: 0;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      overflow-x: auto;
+    }
+    .metric-item {
+      flex: 1; min-width: 160px; max-width: 220px;
+      padding: 28px 24px; text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .metric-item:last-child { border-right: none; }
+    .metric-num {
+      font-size: 40px; font-weight: 900; line-height: 1;
+      font-family: var(--mono); color: var(--accent); margin-bottom: 8px;
+    }
+    .metric-num.green  { color: var(--green); }
+    .metric-num.amber  { color: var(--amber); }
+    .metric-num.purple { color: var(--accent2); }
+    .metric-label { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
+
+    /* ── Sections ── */
+    .story-section {
+      max-width: 1100px; margin: 0 auto;
+      padding: 80px 40px;
+    }
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 12px;
+    }
+    .section-label.situation { color: var(--muted); }
+    .section-label.complication { color: var(--red); }
+    .section-label.resolution { color: var(--green); }
+    .section-label.story { color: var(--accent); }
+    .section-label.audit { color: var(--accent2); }
+    .section-label.value { color: var(--amber); }
+
+    .section-h2 {
+      font-size: clamp(26px, 4vw, 42px); font-weight: 800;
+      line-height: 1.18; letter-spacing: -1px; margin-bottom: 18px;
+    }
+    .section-lead {
+      font-size: 17px; color: var(--muted); max-width: 720px;
+      line-height: 1.7; margin-bottom: 48px;
+    }
+
+    /* ── Divider ── */
+    .story-divider {
+      height: 1px; background: var(--border); margin: 0 40px;
+    }
+
+    /* ── Card grid ── */
+    .card-grid {
+      display: grid; gap: 16px;
+    }
+    .card-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .card-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .card-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+    .story-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 24px;
+    }
+    .story-card.accent-border { border-color: rgba(56,189,248,.35); }
+    .story-card.red-border    { border-color: rgba(239,68,68,.3); }
+    .story-card.green-border  { border-color: rgba(34,197,94,.3); }
+    .story-card.amber-border  { border-color: rgba(245,158,11,.3); }
+    .story-card.purple-border { border-color: rgba(129,140,248,.3); }
+
+    .card-icon {
+      width: 40px; height: 40px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px; font-size: 20px;
+    }
+    .card-icon.blue   { background: rgba(56,189,248,.1); }
+    .card-icon.red    { background: rgba(239,68,68,.1); }
+    .card-icon.green  { background: rgba(34,197,94,.1); }
+    .card-icon.amber  { background: rgba(245,158,11,.1); }
+    .card-icon.purple { background: rgba(129,140,248,.1); }
+
+    .card-title {
+      font-size: 15px; font-weight: 700; margin-bottom: 8px;
+    }
+    .card-body {
+      font-size: 13px; color: var(--muted); line-height: 1.65;
+    }
+
+    /* ── Process flow ── */
+    .flow-row {
+      display: flex; align-items: stretch; gap: 0;
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; margin-bottom: 12px;
+    }
+    .flow-step {
+      flex: 1; padding: 18px 20px; border-right: 1px solid var(--border);
+      position: relative;
+    }
+    .flow-step:last-child { border-right: none; }
+    .flow-step-num {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--dim); margin-bottom: 6px;
+    }
+    .flow-step-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .flow-step-sub   { font-size: 11px; color: var(--muted); }
+    .flow-arrow {
+      display: flex; align-items: center; padding: 0 6px;
+      color: var(--dim); font-size: 18px; flex-shrink: 0;
+    }
+
+    /* ── Comparison table ── */
+    .compare-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+      background: var(--bg2); border-radius: 10px; overflow: hidden;
+    }
+    .compare-table th {
+      padding: 12px 16px; text-align: left;
+      font-size: 10px; font-weight: 700; letter-spacing: .8px;
+      text-transform: uppercase; color: var(--dim);
+      background: var(--surface-hi); border-bottom: 1px solid var(--border);
+    }
+    .compare-table td {
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      color: var(--muted); vertical-align: top;
+    }
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table td:first-child { color: var(--text); font-weight: 500; }
+    .bad  { color: var(--red)   !important; }
+    .good { color: var(--green) !important; }
+
+    /* ── Story timeline ── */
+    .story-timeline {
+      position: relative; padding-left: 40px;
+    }
+    .story-timeline::before {
+      content: ''; position: absolute; left: 12px; top: 0; bottom: 0;
+      width: 2px; background: var(--border);
+    }
+    .timeline-item {
+      position: relative; margin-bottom: 28px;
+    }
+    .timeline-dot {
+      position: absolute; left: -34px; top: 4px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--surface); border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 700; color: var(--accent);
+    }
+    .timeline-step {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 4px;
+    }
+    .timeline-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .timeline-body  { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .timeline-body strong { color: var(--text); }
+
+    /* ── Audit artifact ── */
+    .audit-box {
+      background: #0d1829; border: 1px solid rgba(129,140,248,.2);
+      border-radius: 10px; padding: 24px; font-family: var(--mono);
+      font-size: 12px; line-height: 1.8;
+    }
+    .audit-box .audit-hdr {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--accent2); margin-bottom: 14px;
+      border-bottom: 1px solid rgba(129,140,248,.15); padding-bottom: 8px;
+    }
+    .audit-row { display: flex; gap: 16px; margin-bottom: 4px; }
+    .audit-key { color: var(--dim); min-width: 200px; flex-shrink: 0; }
+    .audit-val { color: var(--text); }
+    .audit-val.green  { color: var(--green); }
+    .audit-val.amber  { color: var(--amber); }
+    .audit-val.blue   { color: var(--accent); }
+    .audit-stamp {
+      margin-top: 16px; padding-top: 12px;
+      border-top: 1px solid rgba(129,140,248,.15);
+      color: var(--dim); font-size: 10px;
+    }
+
+    /* ── Value table ── */
+    .value-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    .value-table th {
+      padding: 10px 16px; text-align: left;
+      font-size: 10px; font-weight: 700; letter-spacing: .8px;
+      text-transform: uppercase; color: var(--dim);
+      background: var(--surface-hi); border: 1px solid var(--border);
+    }
+    .value-table td {
+      padding: 10px 16px; border: 1px solid var(--border);
+      color: var(--muted); vertical-align: middle;
+    }
+    .value-table td:first-child { color: var(--text); font-weight: 500; }
+    .value-table td:last-child  { color: var(--green); font-weight: 700; }
+
+    /* ── CTA ── */
+    .cta-section {
+      text-align: center; padding: 100px 40px;
+      background: radial-gradient(ellipse 70% 50% at 50% 100%, rgba(56,189,248,.06) 0%, transparent 70%);
+    }
+    .cta-title { font-size: clamp(28px, 4vw, 52px); font-weight: 900; letter-spacing: -1.5px; margin-bottom: 20px; }
+    .cta-sub   { font-size: 17px; color: var(--muted); max-width: 520px; margin: 0 auto 40px; line-height: 1.6; }
+
+    /* ── Footer ── */
+    .story-footer {
+      border-top: 1px solid var(--border); text-align: center;
+      padding: 24px; color: var(--dim); font-size: 12px;
+    }
+
+    /* ── Highlight box ── */
+    .highlight-box {
+      background: rgba(56,189,248,.06); border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0; padding: 16px 20px;
+      font-size: 15px; color: var(--text); line-height: 1.65;
+      margin: 24px 0;
+    }
+    .highlight-box.amber { background: rgba(245,158,11,.06); border-color: var(--amber); }
+    .highlight-box.green { background: rgba(34,197,94,.06); border-color: var(--green); }
+    .highlight-box.red   { background: rgba(239,68,68,.06); border-color: var(--red); }
+
+    /* ── Tag ── */
+    .tag {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 600; font-family: var(--mono);
+    }
+    .tag.green  { background: rgba(34,197,94,.12);  color: var(--green); }
+    .tag.amber  { background: rgba(245,158,11,.12); color: var(--amber); }
+    .tag.red    { background: rgba(239,68,68,.12);  color: var(--red); }
+    .tag.blue   { background: rgba(56,189,248,.12); color: var(--accent); }
+    .tag.purple { background: rgba(129,140,248,.12);color: var(--accent2); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .card-grid.cols-2, .card-grid.cols-3, .card-grid.cols-4 { grid-template-columns: 1fr; }
+      .story-nav-links { display: none; }
+      .flow-row { flex-direction: column; }
+      .flow-step { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ───────────────────────────────────────────── -->
+<nav class="story-nav">
+  <div class="story-nav-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </svg>
+    WeldAssign AI
+  </div>
+  <div class="story-nav-links">
+    <a href="#situation">Situation</a>
+    <a href="#complication">Complication</a>
+    <a href="#resolution">Resolution</a>
+    <a href="#demo-story">Demo Story</a>
+    <a href="#audit">Audit Trail</a>
+    <a href="#value">Value Case</a>
+  </div>
+  <a href="index.html" class="story-nav-cta">Launch Demo →</a>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-eyebrow">NPCIL SM-11 · WeldAssign AI · Proof of Concept</div>
+  <h1 class="hero-title">
+    From <span>8-Hour Manual Checks</span><br>to a 3-Minute AI Decision
+  </h1>
+  <p class="hero-sub">
+    How WeldAssign AI turns fragmented welder qualification records, paper WPS documents,
+    and tribal knowledge into a compliant, auditable assignment in one guided workflow.
+  </p>
+  <div class="hero-actions">
+    <a href="index.html" class="btn-hero-primary">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Run the Live Demo
+    </a>
+    <a href="#situation" class="btn-hero-secondary">Read the Story ↓</a>
+  </div>
+</section>
+
+<!-- ── Metrics Strip ─────────────────────────────────────────── -->
+<div class="metrics-strip">
+  <div class="metric-item">
+    <div class="metric-num">80</div>
+    <div class="metric-label">Jobs per Shift</div>
+  </div>
+  <div class="metric-item">
+    <div class="metric-num green">50</div>
+    <div class="metric-label">Welders Evaluated</div>
+  </div>
+  <div class="metric-item">
+    <div class="metric-num">12</div>
+    <div class="metric-label">WPS Documents</div>
+  </div>
+  <div class="metric-item">
+    <div class="metric-num amber">97%</div>
+    <div class="metric-label">Extraction Confidence</div>
+  </div>
+  <div class="metric-item">
+    <div class="metric-num purple">&lt;3 min</div>
+    <div class="metric-label">End-to-End Assignment</div>
+  </div>
+  <div class="metric-item">
+    <div class="metric-num green">100%</div>
+    <div class="metric-label">Audit Coverage</div>
+  </div>
+</div>
+
+<!-- ── Situation ─────────────────────────────────────────────── -->
+<section class="story-section" id="situation">
+  <div class="section-label situation">01 · Situation</div>
+  <h2 class="section-h2">Nuclear Welding is <em>Unforgiving</em> — and the Process Hasn't Changed in Decades</h2>
+  <p class="section-lead">
+    NPCIL SM-11 operations run three shifts per day. Every shift, supervisors must match qualified welders
+    to critical pressure-boundary joints — cross-checking WPS documents, qualification tickets, continuity records,
+    and shift rosters by hand.
+  </p>
+
+  <div class="card-grid cols-3">
+    <div class="story-card">
+      <div class="card-icon blue">📋</div>
+      <div class="card-title">Regulatory Framework</div>
+      <div class="card-body">ASME Section IX and IS 2825 require every welder to hold a valid, in-scope qualification ticket before touching a production weld. Process, material group, thickness, position, and PWHT must all align.</div>
+    </div>
+    <div class="story-card">
+      <div class="card-icon amber">📁</div>
+      <div class="card-title">Document Sprawl</div>
+      <div class="card-body">WPS documents live as PDF files. Qualification records live in a separate register. Continuity logs are maintained in spreadsheets. No system connects them at shift time.</div>
+    </div>
+    <div class="story-card">
+      <div class="card-icon blue">👷</div>
+      <div class="card-title">Human Dependency</div>
+      <div class="card-body">Assignment correctness depends entirely on the Welding Engineer's memory and attention. When the senior engineer is absent, junior staff may not know every edge case — thickness limits, position coverage, expiry windows.</div>
+    </div>
+  </div>
+</section>
+
+<div class="story-divider"></div>
+
+<!-- ── Complication ───────────────────────────────────────────── -->
+<section class="story-section" id="complication">
+  <div class="section-label complication">02 · Complication</div>
+  <h2 class="section-h2">Three Failure Modes that Cost Real Money — and Carry Real Risk</h2>
+  <p class="section-lead">
+    The current process is not merely slow. It creates three categories of failure with direct financial, safety, and regulatory consequences.
+  </p>
+
+  <div class="highlight-box red">
+    <strong>The core problem:</strong> a qualified welder is not the same as a qualified welder <em>for this job</em>.
+    A welder might hold a valid SMAW ticket but on the wrong P-number, or a full-range ticket that has lapsed continuity,
+    or a limited-range ticket that doesn't cover the joint thickness. Manual checking catches these only if the checker
+    knows exactly what to look for — and has time.
+  </div>
+
+  <div class="card-grid cols-3" style="margin-bottom:32px">
+    <div class="story-card red-border">
+      <div class="card-icon red">⚠️</div>
+      <div class="card-title">Non-Conformance Risk</div>
+      <div class="card-body">Assigning an out-of-scope welder creates a non-conformance record that triggers a full weld repair, post-weld inspection, and root-cause documentation. On a pressure boundary, that means system downtime.</div>
+    </div>
+    <div class="story-card amber-border">
+      <div class="card-icon amber">⏱️</div>
+      <div class="card-title">Shift Delays</div>
+      <div class="card-body">Average manual cross-check: 25–40 minutes per complex job. For an 80-job shift with 12 WPS documents in scope, that time compounds. Critical path jobs wait while paperwork is verified.</div>
+    </div>
+    <div class="story-card red-border">
+      <div class="card-icon red">🔍</div>
+      <div class="card-title">Audit Gaps</div>
+      <div class="card-body">Current process leaves no structured audit trail. Who checked which constraint, which data version, at what time — is unrecorded. External auditors have no digital evidence chain to review.</div>
+    </div>
+  </div>
+
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Scenario</th>
+        <th>Today (Manual)</th>
+        <th>With WeldAssign AI</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>WPS field extraction</td>
+        <td class="bad">Manual look-up across PDF pages</td>
+        <td class="good">AI-extracted in &lt;2s with 97% confidence</td>
+      </tr>
+      <tr>
+        <td>Thickness / position check</td>
+        <td class="bad">Engineer reads ticket text, compares mentally</td>
+        <td class="good">8-constraint validation, PASS/FAIL/WARN per check</td>
+      </tr>
+      <tr>
+        <td>Process-to-ticket mapping</td>
+        <td class="bad">Tribal knowledge, prone to edge-case errors</td>
+        <td class="good">Deterministic qualification mapping table, always current</td>
+      </tr>
+      <tr>
+        <td>Rejection explanation</td>
+        <td class="bad">None — assignment just doesn't happen</td>
+        <td class="good">Full constraint breakdown per welder with remediation path</td>
+      </tr>
+      <tr>
+        <td>Audit trail</td>
+        <td class="bad">No structured record</td>
+        <td class="good">Timestamped, signed execution ticket with AI confidence score</td>
+      </tr>
+      <tr>
+        <td>Time per assignment</td>
+        <td class="bad">25–40 min (complex jobs)</td>
+        <td class="good">Under 3 min end-to-end</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="story-divider"></div>
+
+<!-- ── Resolution ─────────────────────────────────────────────── -->
+<section class="story-section" id="resolution">
+  <div class="section-label resolution">03 · Resolution</div>
+  <h2 class="section-h2">A Seven-Step AI Workflow that Encodes the Welding Engineer's Knowledge</h2>
+  <p class="section-lead">
+    WeldAssign AI doesn't replace the engineer — it gives them a tool that never forgets a constraint,
+    never skips a check, and always produces a printable audit artifact.
+  </p>
+
+  <div class="flow-row">
+    <div class="flow-step">
+      <div class="flow-step-num">Step 1</div>
+      <div class="flow-step-title">Shift Planner</div>
+      <div class="flow-step-sub">Select job from 80-job queue, filtered by shift / priority / WPS</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">Step 2</div>
+      <div class="flow-step-title">WPS Extraction</div>
+      <div class="flow-step-sub">AI reads WPS PDF — extracts 12 qualification fields at 97% confidence</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">Step 3</div>
+      <div class="flow-step-title">Job Validation</div>
+      <div class="flow-step-sub">8-constraint check: material, thickness, position, PWHT, PQR, progression</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">Step 4</div>
+      <div class="flow-step-title">Qual Mapping</div>
+      <div class="flow-step-sub">Preferred + alternate qualification ticket identified from matrix</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">Step 5</div>
+      <div class="flow-step-title">Welder Matching</div>
+      <div class="flow-step-sub">All 50 welders scored — ranked by compatibility with rejection explanations</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">Step 6</div>
+      <div class="flow-step-title">Supervisor Approval</div>
+      <div class="flow-step-sub">1-click approval with full constraint evidence available on demand</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">Step 7</div>
+      <div class="flow-step-title">Execution Ticket</div>
+      <div class="flow-step-sub">Printable ticket: job + WPS + welder + pass parameters + signatures</div>
+    </div>
+  </div>
+
+  <div class="highlight-box green" style="margin-top:32px">
+    <strong>Key design principle:</strong> every decision is traceable to a specific data field, qualification record, or rule.
+    The system never makes an invisible assumption. A welder rejected for thickness mismatch sees exactly which ticket
+    covers which range — and what ticket they would need to be eligible.
+  </div>
+</section>
+
+<div class="story-divider"></div>
+
+<!-- ── Demo Story ─────────────────────────────────────────────── -->
+<section class="story-section" id="demo-story">
+  <div class="section-label story">04 · Demo Story</div>
+  <h2 class="section-h2">JOB-001 — A Real Assignment Decision, Step by Step</h2>
+  <p class="section-lead">
+    The demo walks through a single high-priority job: a 12 mm groove weld on P1 carbon steel,
+    requiring SMAW process in the 3G vertical position. Four named welders are highlighted to tell
+    the full decision story.
+  </p>
+
+  <div class="story-timeline">
+
+    <div class="timeline-item">
+      <div class="timeline-dot">1</div>
+      <div class="timeline-step">Shift Planner</div>
+      <div class="timeline-title">JOB-001 selected — Critical Priority, Shift A</div>
+      <div class="timeline-body">
+        Work order WO-2026-0892 requires a 12 mm groove weld on <strong>P1 → P1 base metal</strong>,
+        position 3G (vertical), full-range ticket required.
+        WPS assigned: <strong>WPS-001</strong> (SMAW, ASME Sec IX, supported by PQR-001).
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot">2</div>
+      <div class="timeline-step">WPS Extraction</div>
+      <div class="timeline-title">AI extracts 12 fields from WPS-001 at 97% confidence</div>
+      <div class="timeline-body">
+        Critical qualification drivers identified: <strong>SMAW process · P1/P1 material group ·
+        groove thickness 3–40 mm · all-position coverage · vertical uphill progression ·
+        no PWHT required</strong>.
+        Execution parameters (amps, volts, travel speed) staged for the execution ticket.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot">3</div>
+      <div class="timeline-step">Job Validation</div>
+      <div class="timeline-title">All 8 checks pass — green path to matching</div>
+      <div class="timeline-body">
+        Job thickness 12 mm is within WPS range (3–40 mm) ✓ · P1 material matches ✓ ·
+        3G position within "All" coverage ✓ · No PWHT required, WPS says NA ✓ ·
+        PQR-001 is Qualified ✓ · Progression compatible ✓.
+        No hard failures — welder matching is unlocked.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot">4</div>
+      <div class="timeline-step">Qualification Mapping</div>
+      <div class="timeline-title">Preferred ticket Q-SM11-SMAW-P1P1-ALL-FR identified</div>
+      <div class="timeline-body">
+        The mapping table resolves <strong>WPS-001 → Q-SM11-SMAW-P1P1-ALL-FR</strong> as preferred
+        (full-range, covers 3–40 mm, all positions).
+        Alternate ticket Q-SM11-SMAW-P1P1-3G-LR is available but <strong>not usable</strong> —
+        it's limited to ≤8 mm and the job is 12 mm.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot">5A</div>
+      <div class="timeline-step">Welder Matching — Recommended</div>
+      <div class="timeline-title">Maria Chen (W-104) → Recommended</div>
+      <div class="timeline-body">
+        Holds <strong>Q-SM11-SMAW-P1P1-ALL-FR</strong> (preferred full-range ticket) ·
+        Active continuity · Qualification expires 2027-06-15 (400+ days remaining) ·
+        Shift A match · Zero hard rejections · Zero warnings.
+        <span class="tag green">Recommended</span>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot">5B</div>
+      <div class="timeline-step">Welder Matching — Rejected: Thickness</div>
+      <div class="timeline-title">David Patel (W-117) → Rejected</div>
+      <div class="timeline-body">
+        David holds only the <strong>limited-range ticket Q-SM11-SMAW-P1P1-3G-LR</strong>,
+        which covers up to 8 mm. The job requires 12 mm.
+        Hard rejection: <em>"Ticket max thickness 8.0 mm &lt; job 12.0 mm."</em>
+        Remediation: qualify to full-range ticket or reassign to a ≤8 mm job.
+        <span class="tag red">Rejected</span>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot">5C</div>
+      <div class="timeline-step">Welder Matching — Rejected: Process Mismatch</div>
+      <div class="timeline-title">Aisha Khan (W-145) → Rejected</div>
+      <div class="timeline-body">
+        Aisha holds a valid <strong>GTAW</strong> qualification.
+        This job requires <strong>SMAW</strong>. Hard rejection: <em>"Process mismatch — GTAW ≠ SMAW."</em>
+        A different SMAW ticket, or a job using GTAW process, would make her eligible.
+        <span class="tag red">Rejected</span>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot">6</div>
+      <div class="timeline-step">Approval</div>
+      <div class="timeline-title">Maria Chen approved in one click</div>
+      <div class="timeline-body">
+        Supervisor reviews the constraint breakdown, sees zero warnings, and clicks <strong>Approve</strong>.
+        The system logs the assignment, updates job status to Assigned, and generates
+        the Execution Ticket in under 200 ms.
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot">7</div>
+      <div class="timeline-step">Execution Ticket</div>
+      <div class="timeline-title">Full audit artifact generated, printable</div>
+      <div class="timeline-body">
+        The ticket includes: job details · WPS/PQR · welder qualification · pass-by-pass
+        parameters (Root/1st/2nd/3rd/Balance with amps, volts, travel speed) ·
+        QC hold points · AI extraction confidence · three signature lines.
+        Ready for the weld traveler package.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="story-divider"></div>
+
+<!-- ── Audit Artifact ──────────────────────────────────────────── -->
+<section class="story-section" id="audit">
+  <div class="section-label audit">05 · Audit Artifact</div>
+  <h2 class="section-h2">Every Assignment Produces a Structured, Defensible Record</h2>
+  <p class="section-lead">
+    The Execution Ticket is not a report generated after the fact — it is the primary output of the assignment workflow,
+    capturing every input that contributed to the decision.
+  </p>
+
+  <div class="audit-box">
+    <div class="audit-hdr">WELD EXECUTION TICKET — NPCIL SM-11 · AI-Generated · 2026-05-07 06:14</div>
+    <div class="audit-row"><span class="audit-key">Job ID</span><span class="audit-val blue">JOB-001</span></div>
+    <div class="audit-row"><span class="audit-key">Work Order</span><span class="audit-val">WO-2026-0892</span></div>
+    <div class="audit-row"><span class="audit-key">Location</span><span class="audit-val">Reactor Building · Coolant Line 4A</span></div>
+    <div class="audit-row"><span class="audit-key">WPS No.</span><span class="audit-val blue">NPCIL-WPS-001-SMAW</span></div>
+    <div class="audit-row"><span class="audit-key">Supporting PQR</span><span class="audit-val">PQR-001 (Qualified)</span></div>
+    <div class="audit-row"><span class="audit-key">AI Extraction Confidence</span><span class="audit-val green">97%</span></div>
+    <div class="audit-row"><span class="audit-key">Assigned Welder</span><span class="audit-val green">Maria Chen — W-104</span></div>
+    <div class="audit-row"><span class="audit-key">Qualification Ticket</span><span class="audit-val blue">Q-SM11-SMAW-P1P1-ALL-FR (Full Range)</span></div>
+    <div class="audit-row"><span class="audit-key">Continuity Status</span><span class="audit-val green">Active</span></div>
+    <div class="audit-row"><span class="audit-key">Expiry Date</span><span class="audit-val">2027-06-15 (400 days remaining)</span></div>
+    <div class="audit-row"><span class="audit-key">Validation Result</span><span class="audit-val green">PASS — all 8 checks</span></div>
+    <div class="audit-row"><span class="audit-key">Pass Parameters</span><span class="audit-val">Root: E-6010 2.5mm 80-100A · Fill: E-7018 3.15mm 110-130A</span></div>
+    <div class="audit-row"><span class="audit-key">Hard Rejections</span><span class="audit-val green">None</span></div>
+    <div class="audit-row"><span class="audit-key">Warnings</span><span class="audit-val green">None</span></div>
+    <div class="audit-row"><span class="audit-key">Approved By</span><span class="audit-val">Shift Supervisor — digital signature pending</span></div>
+    <div class="audit-stamp">
+      Generated by WeldAssign AI · NPCIL SM-11 · Ref: WA-2026-0507-0001 · All fields traceable to source records
+    </div>
+  </div>
+
+  <div style="margin-top:24px" class="card-grid cols-3">
+    <div class="story-card accent-border">
+      <div class="card-title">What the ticket proves</div>
+      <div class="card-body">Every field links to a source: WPS PDF (with page reference), qualification register (ticket ID), job manifest (work order). An auditor can trace any value back to its origin in under 60 seconds.</div>
+    </div>
+    <div class="story-card accent-border">
+      <div class="card-title">What it replaces</div>
+      <div class="card-body">The manual "weld traveler" compiled from three separate documents. Previously a paper form filled in by hand, subject to transcription errors and missing fields.</div>
+    </div>
+    <div class="story-card accent-border">
+      <div class="card-title">What it enables</div>
+      <div class="card-body">Digital-first QA workflows. The structured data format allows downstream consumption by NDT scheduling, weld map systems, and inspection management tools — no re-entry required.</div>
+    </div>
+  </div>
+</section>
+
+<div class="story-divider"></div>
+
+<!-- ── Value Case ──────────────────────────────────────────────── -->
+<section class="story-section" id="value">
+  <div class="section-label value">06 · Value Case</div>
+  <h2 class="section-h2">Quantifiable Return Across Three Dimensions</h2>
+  <p class="section-lead">
+    The business case for WeldAssign AI does not rely on cost savings alone.
+    The real value sits at the intersection of speed, compliance, and institutional resilience.
+  </p>
+
+  <table class="value-table" style="margin-bottom:32px">
+    <thead>
+      <tr>
+        <th>Value Driver</th>
+        <th>Current State</th>
+        <th>With AI</th>
+        <th>Improvement</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Complex assignment time</td>
+        <td>25–40 min/job</td>
+        <td>Under 3 min</td>
+        <td>~90% reduction</td>
+      </tr>
+      <tr>
+        <td>Non-conformance rate</td>
+        <td>Estimated 3–5% scope errors</td>
+        <td>Near-zero (enforced constraints)</td>
+        <td>Near elimination</td>
+      </tr>
+      <tr>
+        <td>Audit readiness</td>
+        <td>Manual reconstruction, days</td>
+        <td>Instant — structured records</td>
+        <td>Same-day audit response</td>
+      </tr>
+      <tr>
+        <td>Key-person dependency</td>
+        <td>Single senior engineer carries knowledge</td>
+        <td>Rules encoded, any supervisor can run</td>
+        <td>Resilience achieved</td>
+      </tr>
+      <tr>
+        <td>Exception handling</td>
+        <td>Ad-hoc, unrecorded</td>
+        <td>Structured queue, engineering review flag</td>
+        <td>Full traceability</td>
+      </tr>
+      <tr>
+        <td>WPS digitisation</td>
+        <td>Manual PDF look-up</td>
+        <td>97% confidence AI extraction</td>
+        <td>Operational velocity</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card-grid cols-2">
+    <div class="story-card green-border">
+      <div class="card-icon green">📈</div>
+      <div class="card-title">Phase 1 — Current Demo (PoC)</div>
+      <div class="card-body">
+        Validates the workflow end-to-end with embedded data. Demonstrates AI extraction,
+        qualification mapping, welder scoring, exception detection, and audit ticket generation.
+        No backend required — runs in a browser.
+      </div>
+    </div>
+    <div class="story-card purple-border">
+      <div class="card-icon purple">🔗</div>
+      <div class="card-title">Phase 2 — Production Integration</div>
+      <div class="card-body">
+        Connect to live welder qualification register, WPS document management system,
+        and ERP work-order feed. Real-time continuity checks, automated expiry alerts,
+        and API output to downstream inspection scheduling.
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="story-divider"></div>
+
+<!-- ── CTA ────────────────────────────────────────────────────── -->
+<section class="cta-section">
+  <h2 class="cta-title">See It In Action</h2>
+  <p class="cta-sub">
+    The live demo runs the complete 10-step workflow on real NPCIL SM-11 data —
+    guided mode walks through every decision point in under 5 minutes.
+  </p>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+    <a href="index.html" class="btn-hero-primary">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Launch Guided Demo
+    </a>
+    <a href="index.html#shift-planner" class="btn-hero-secondary">
+      Open Shift Planner →
+    </a>
+  </div>
+  <div style="margin-top:32px;font-size:12px;color:var(--dim)">
+    Guided Demo Mode · 10 steps · JOB-001 pre-loaded · No login required
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────────────────────────── -->
+<footer class="story-footer">
+  WeldAssign AI · NPCIL SM-11 Proof of Concept · Built for Straive · 2026
+</footer>
+
+</body>
+</html>

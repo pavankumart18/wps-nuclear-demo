@@ -1,0 +1,4 @@
+pqr_no,linked_wps_id,linked_source_wps_no,test_coupon_thickness_mm,test_position,process,result_summary,qualified_status,test_report_no,pqr_needed_before_use,notes
+A,WPS-001,NPCIL-STD-SM-11,10.0,3G Vertical,SMAW,Tensile and bend tests satisfactory; visual examination good,Acceptable,Synthetic reference to 44079,False,Supports the qualified WPS used in primary demo.
+C,WPS-003,NPCIL-STD-GT-11,10.0,3G Vertical,GTAW,Tensile and bend tests satisfactory; visual examination good,Acceptable,Synthetic reference to 44079-B,False,GTAW contrast scenario.
+USER_REQUIRED,WPS-002,NPCIL-SM-11H,,,SMAW,To be made by user organization,Pending,,True,PWHT exception scenario.

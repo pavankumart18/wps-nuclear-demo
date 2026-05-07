@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeldAssign AI · NPCIL SM-11 Welding Assignment Demo</title>
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <!-- App CSS -->
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="app" class="app-shell">
+
+  <!-- ── Sidebar ──────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-icon">
+          <i data-lucide="zap"></i>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">WeldAssign AI</span>
+          <span class="logo-sub">NPCIL SM-11 Demo</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">Workflow</div>
+      <a class="nav-item active" data-section="shift-planner">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Shift Planner</span>
+      </a>
+      <a class="nav-item" data-section="wps-extraction">
+        <i data-lucide="file-text"></i>
+        <span>WPS Extraction</span>
+      </a>
+      <a class="nav-item" data-section="validation">
+        <i data-lucide="check-circle"></i>
+        <span>Job Validation</span>
+      </a>
+      <a class="nav-item" data-section="qual-mapping">
+        <i data-lucide="git-branch"></i>
+        <span>Qual Mapping</span>
+      </a>
+      <a class="nav-item" data-section="welder-matching">
+        <i data-lucide="users"></i>
+        <span>Welder Matching</span>
+      </a>
+
+      <div class="nav-separator"></div>
+      <div class="nav-group-label">Review</div>
+      <a class="nav-item" data-section="exceptions">
+        <i data-lucide="alert-triangle"></i>
+        <span>Exceptions</span>
+      </a>
+      <a class="nav-item" data-section="execution-ticket">
+        <i data-lucide="file-check"></i>
+        <span>Execution Ticket</span>
+      </a>
+
+      <div class="nav-separator"></div>
+      <div class="nav-group-label">Business Case</div>
+      <a class="nav-item" href="story.html" target="_blank" style="text-decoration:none">
+        <i data-lucide="book-open"></i>
+        <span>The Story</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="shift-indicator">
+        <span class="shift-label">Active Shift</span>
+        <span class="shift-badge">A · 06:00 – 14:00</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main Wrapper ──────────────────────────────────────────── -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-job" id="topbar-job-info">
+          <span class="topbar-hint">No job selected — select a job from the Shift Planner</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="guided-toggle" id="guided-toggle" onclick="toggleGuided()">
+          <span class="guided-dot"></span>
+          <span>Guided Demo</span>
+        </div>
+        <div class="topbar-date" id="topbar-date">2026-05-07</div>
+      </div>
+    </header>
+
+    <!-- Guided demo bar -->
+    <div class="guided-bar visible" id="guided-bar">
+      <div class="guided-step-badge">Step <span id="guided-step-num">1 / 8</span></div>
+      <div class="guided-hint" id="guided-hint">Select JOB-001 from the table to begin the guided demo</div>
+      <div class="guided-actions">
+        <button class="btn-guided" onclick="guidedPrev()">← Prev</button>
+        <button class="btn-guided" onclick="guidedNext()">Next →</button>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <main class="content" id="main-content">
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading welding data…</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── Right Drawer ──────────────────────────────────────────── -->
+  <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <div class="drawer-title" id="drawer-title">Details</div>
+      <button class="drawer-close" onclick="closeDrawer()">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+    <div class="drawer-footer" id="drawer-footer" style="display:none"></div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- AI Loading overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-modal">
+      <div class="loading-spinner-wrap">
+        <div class="loading-ring-outer"></div>
+        <div class="loading-ring-inner"></div>
+        <div class="loading-center-icon" id="loading-center-icon">⚙</div>
+      </div>
+      <div class="loading-title" id="loading-title">Processing…</div>
+      <div class="loading-msg"   id="loading-msg">Please wait…</div>
+      <div class="loading-progress-track">
+        <div class="loading-progress-bar" id="loading-progress-bar"></div>
+      </div>
+      <div class="loading-sub">WeldAssign AI · NPCIL SM-11</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Scripts — order matters -->
+<script src="js/data-embedded.js"></script>
+<script src="js/matching.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

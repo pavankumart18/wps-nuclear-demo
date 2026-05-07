@@ -1,0 +1,34 @@
+wps_id,inspection_stage,inspection_method,qc_hold_point,required_documentation,inspector_qualification_required,notes
+WPS-001,Before weld release,Document verification,"Confirm WPS acceptance, welder qualification, material group, and consumables","Approved WPS, job traveler, qualification record",QC welding inspector,Mandatory in demo
+WPS-001,In-process,Visual / parameter check,Verify preheat/interpass and pass cleaning where applicable,In-process weld log,QC welding inspector,Can be scheduled after assignment
+WPS-001,Final,VT + NDE per inspection plan,Hold before release if pressure-retaining,Inspection report and traceability packet,NDE Level II if NDE required,Synthetic final inspection requirement
+WPS-002,Before weld release,Document verification,"Confirm WPS acceptance, welder qualification, material group, and consumables","Approved WPS, job traveler, qualification record",QC welding inspector,Mandatory in demo
+WPS-002,In-process,Visual / parameter check,Verify preheat/interpass and pass cleaning where applicable,In-process weld log,QC welding inspector,Can be scheduled after assignment
+WPS-002,Final,VT + NDE per inspection plan,Hold before release if pressure-retaining,Inspection report and traceability packet,NDE Level II if NDE required,Synthetic final inspection requirement
+WPS-003,Before weld release,Document verification,"Confirm WPS acceptance, welder qualification, material group, and consumables","Approved WPS, job traveler, qualification record",QC welding inspector,Mandatory in demo
+WPS-003,In-process,Visual / parameter check,Verify preheat/interpass and pass cleaning where applicable,In-process weld log,QC welding inspector,Can be scheduled after assignment
+WPS-003,Final,VT + NDE per inspection plan,Hold before release if pressure-retaining,Inspection report and traceability packet,NDE Level II if NDE required,Synthetic final inspection requirement
+WPS-004,Before weld release,Document verification,"Confirm WPS acceptance, welder qualification, material group, and consumables","Approved WPS, job traveler, qualification record",QC welding inspector,Mandatory in demo
+WPS-004,In-process,Visual / parameter check,Verify preheat/interpass and pass cleaning where applicable,In-process weld log,QC welding inspector,Can be scheduled after assignment
+WPS-004,Final,VT + NDE per inspection plan,Hold before release if pressure-retaining,Inspection report and traceability packet,NDE Level II if NDE required,Synthetic final inspection requirement
+WPS-005,Before weld release,Document verification,"Confirm WPS acceptance, welder qualification, material group, and consumables","Approved WPS, job traveler, qualification record",QC welding inspector,Mandatory in demo
+WPS-005,In-process,Visual / parameter check,Verify preheat/interpass and pass cleaning where applicable,In-process weld log,QC welding inspector,Can be scheduled after assignment
+WPS-005,Final,VT + NDE per inspection plan,Hold before release if pressure-retaining,Inspection report and traceability packet,NDE Level II if NDE required,Synthetic final inspection requirement
+WPS-006,Before weld release,Document verification,"Confirm WPS acceptance, welder qualification, material group, and consumables","Approved WPS, job traveler, qualification record",QC welding inspector,Mandatory in demo
+WPS-006,In-process,Visual / parameter check,Verify preheat/interpass and pass cleaning where applicable,In-process weld log,QC welding inspector,Can be scheduled after assignment
+WPS-007,Before weld release,Document verification,"Confirm WPS acceptance, welder qualification, material group, and consumables","Approved WPS, job traveler, qualification record",QC welding inspector,Mandatory in demo
+WPS-007,In-process,Visual / parameter check,Verify preheat/interpass and pass cleaning where applicable,In-process weld log,QC welding inspector,Can be scheduled after assignment
+WPS-007,Final,VT + NDE per inspection plan,Hold before release if pressure-retaining,Inspection report and traceability packet,NDE Level II if NDE required,Synthetic final inspection requirement
+WPS-008,Before weld release,Document verification,"Confirm WPS acceptance, welder qualification, material group, and consumables","Approved WPS, job traveler, qualification record",QC welding inspector,Mandatory in demo
+WPS-008,In-process,Visual / parameter check,Verify preheat/interpass and pass cleaning where applicable,In-process weld log,QC welding inspector,Can be scheduled after assignment
+WPS-008,Final,VT + NDE per inspection plan,Hold before release if pressure-retaining,Inspection report and traceability packet,NDE Level II if NDE required,Synthetic final inspection requirement
+WPS-009,Before weld release,Document verification,"Confirm WPS acceptance, welder qualification, material group, and consumables","Approved WPS, job traveler, qualification record",QC welding inspector,Mandatory in demo
+WPS-009,In-process,Visual / parameter check,Verify preheat/interpass and pass cleaning where applicable,In-process weld log,QC welding inspector,Can be scheduled after assignment
+WPS-010,Before weld release,Document verification,"Confirm WPS acceptance, welder qualification, material group, and consumables","Approved WPS, job traveler, qualification record",QC welding inspector,Mandatory in demo
+WPS-010,In-process,Visual / parameter check,Verify preheat/interpass and pass cleaning where applicable,In-process weld log,QC welding inspector,Can be scheduled after assignment
+WPS-011,Before weld release,Document verification,"Confirm WPS acceptance, welder qualification, material group, and consumables","Approved WPS, job traveler, qualification record",QC welding inspector,Mandatory in demo
+WPS-011,In-process,Visual / parameter check,Verify preheat/interpass and pass cleaning where applicable,In-process weld log,QC welding inspector,Can be scheduled after assignment
+WPS-011,Final,VT + NDE per inspection plan,Hold before release if pressure-retaining,Inspection report and traceability packet,NDE Level II if NDE required,Synthetic final inspection requirement
+WPS-012,Before weld release,Document verification,"Confirm WPS acceptance, welder qualification, material group, and consumables","Approved WPS, job traveler, qualification record",QC welding inspector,Mandatory in demo
+WPS-012,In-process,Visual / parameter check,Verify preheat/interpass and pass cleaning where applicable,In-process weld log,QC welding inspector,Can be scheduled after assignment
+WPS-012,Final,VT + NDE per inspection plan,Hold before release if pressure-retaining,Inspection report and traceability packet,NDE Level II if NDE required,Synthetic final inspection requirement
