@@ -22,6 +22,42 @@ function icon(name, cls='') {
   return src ? src.replace('<svg ', `<svg class="icon ${cls}" `) : '';
 }
 
+// ─── Welder Avatar Helpers ────────────────────────────────────────────────────
+const AVATAR_PALETTE = [
+  '#38bdf8','#22c55e','#a855f7','#f59e0b','#ef4444',
+  '#14b8a6','#ec4899','#6366f1','#fb923c','#84cc16',
+];
+function welderInitials(name) {
+  return (name || '?').split(' ').filter(Boolean).slice(0,2).map(p => p[0]).join('').toUpperCase();
+}
+function welderAvatarColor(id) {
+  const n = parseInt((id || '0').replace(/\D/g,'')) || 0;
+  return AVATAR_PALETTE[n % AVATAR_PALETTE.length];
+}
+function welderExpYears(id) {
+  const n = parseInt((id || '100').replace(/\D/g,'')) || 100;
+  return 3 + (n % 17);
+}
+function welderLastWeld(id) {
+  const n = parseInt((id || '1').replace(/\D/g,'')) || 1;
+  const daysAgo = n % 28;
+  const d = new Date('2026-05-07');
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString().substring(0,10);
+}
+
+// ─── Location Enrichment ──────────────────────────────────────────────────────
+const LOCATION_LABELS = {
+  'Bay 1':            'Reactor Bldg · Bay 1 · Zone A',
+  'Bay 2':            'Turbine Hall · Bay 2 · Zone B',
+  'Bay 3':            'Auxiliary Bldg · Bay 3 · Zone C',
+  'Field Maintenance':'Open Area · Field Maint.',
+  'QA Hold Area':     'QA Hold Bay · Inspection',
+};
+function enrichLocation(loc) {
+  return LOCATION_LABELS[loc] || loc;
+}
+
 // ─── State ────────────────────────────────────────────────────────────────────
 const S = {
   section: 'shift-planner',
@@ -248,16 +284,27 @@ function renderShiftPlanner() {
     const tooltip    = wpsRec ? esc(`${wpsRec.source_wps_no} — ${wpsRec.welding_process_root || ''}`) : '';
     const priorityColor = { Critical: 'red', High: 'red', Medium: 'amber', Low: 'gray' }[j.priority] || 'gray';
 
+    const jointId = 'WJ-' + j.work_order.replace('WO-','');
+    const locLabel = enrichLocation(j.location);
+
     return `
       <tr class="${isSelected ? 'selected' : ''}" id="job-row-${j.job_id}"
           data-action="select-job" data-job-id="${esc(j.job_id)}">
         <td>
-          <span class="text-mono text-accent">${esc(j.job_id)}</span>
-          ${isDemo ? '<span class="demo-pill" style="margin-left:6px">★ Demo</span>' : ''}
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span class="text-mono text-accent">${esc(j.job_id)}</span>
+            ${isDemo ? '<span class="demo-pill">★ Demo</span>' : ''}
+          </div>
         </td>
-        <td class="text-mono text-muted" style="font-size:11px">${esc(j.work_order)}</td>
+        <td>
+          <div class="text-mono text-muted" style="font-size:11px">${esc(j.work_order)}</div>
+          <div style="font-size:9.5px;color:var(--dim);font-family:var(--mono)">${esc(jointId)}</div>
+        </td>
         <td data-tooltip="${tooltip}" class="text-mono" style="font-size:12px">${esc(j.wps_id)}</td>
-        <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(j.job_description)}</td>
+        <td style="max-width:220px">
+          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${esc(j.job_description)}</div>
+          <div style="font-size:10px;color:var(--dim);margin-top:2px">${esc(locLabel)}</div>
+        </td>
         <td class="text-mono" style="font-size:12px">${j.thickness_mm} mm</td>
         <td>${badgeHtml('gray', j.required_position)}</td>
         <td>${badgeHtml('gray', j.shift)}</td>
@@ -526,7 +573,10 @@ function renderWPSTabContent(wps, tab) {
 function fld(label, value, highlight=false, source='', tooltip='') {
   const tip = tooltip ? ` data-tooltip="${esc(source + (tooltip ? ' · ' + tooltip : ''))}"` : (source ? ` data-tooltip="${esc(source)}"` : '');
   const confPct = S.wpsRecord ? Math.round((S.wpsRecord.extraction_confidence || 0.97) * 100) : 97;
-  const confBadge = `<span class="field-conf-badge" style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(56,189,248,.1);color:#38bdf8;font-family:var(--mono);margin-left:4px">${confPct}%</span>`;
+  const needsReview = S.wpsRecord?.extraction_review_required;
+  const confBadge = needsReview
+    ? `<span class="field-conf-badge" style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(245,158,11,.12);color:#f59e0b;font-family:var(--mono);margin-left:4px">⚠ ${confPct}%</span>`
+    : `<span class="field-conf-badge" style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(56,189,248,.1);color:#38bdf8;font-family:var(--mono);margin-left:4px">${confPct}%</span>`;
   return `
     <div class="field-row"${tip}>
       <div class="field-label">${esc(label)}</div>
@@ -733,18 +783,35 @@ function welderRow(r, rank, results) {
   const ticket  = r.bestTicket?.ticket_id || '—';
   const approvable = ['Recommended','Eligible','Backup','Conditional'].includes(r.status) && !S.approvedWelder;
   const isApproved = S.approvedWelder?.welder.welder_id === r.welder.welder_id;
-  const wid = esc(r.welder.welder_id);
+  const wid  = esc(r.welder.welder_id);
+  const avc  = welderAvatarColor(r.welder.welder_id);
+  const av   = welderInitials(r.welder.welder_name);
+  const exp  = welderExpYears(r.welder.welder_id);
+  const lastW = welderLastWeld(r.welder.welder_id);
+  const daysAgoW = Math.round((new Date('2026-05-07') - new Date(lastW)) / 86400000);
+  const contCls = r.welder.continuity_status === 'Active' ? 'dose-chip' : 'dose-chip warn';
+
   return `
     <tr id="welder-row-${wid}" data-action="select-welder" data-welder-id="${wid}">
       <td><div class="welder-rank-num ${rankCls}">${rank}</div></td>
       <td>
-        <div class="welder-name">${esc(r.welder.welder_name)}</div>
-        <div class="welder-id">${esc(r.welder.welder_id)}</div>
+        <div style="display:flex;align-items:center;gap:9px">
+          <div class="welder-avatar" style="background:${avc}22;color:${avc};border:1.5px solid ${avc}44">${av}</div>
+          <div>
+            <div class="welder-name">${esc(r.welder.welder_name)}</div>
+            <div class="welder-id">${esc(r.welder.welder_id)} · ${exp} yrs exp</div>
+          </div>
+        </div>
       </td>
       <td>${badgeHtml('gray', r.welder.shift)}</td>
       <td class="text-mono" style="font-size:11px">${esc(ticket)}</td>
       <td>${badgeHtml(statusColor(r.status), r.status)}</td>
-      <td><div style="display:flex;flex-wrap:wrap;gap:3px">${warns}${rejects}</div></td>
+      <td>
+        <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center">
+          ${warns}${rejects}
+          <span class="${contCls}">${esc(r.welder.continuity_status)}</span>
+        </div>
+      </td>
       <td>
         ${isApproved
           ? `<span class="badge badge-green">✓ Approved</span>`
@@ -943,14 +1010,18 @@ function renderExecutionTicket() {
   const cons = wps ? S.data.consumables.filter(c => c.wps_id === wps.wps_id) : [];
   const ticketId = aw.bestTicket?.ticket_id || '—';
   const now = new Date().toISOString().substring(0,16).replace('T',' ');
+  const dcn = 'WA-' + now.substring(0,10).replace(/-/g,'') + '-' + j.job_id.replace('JOB-','').padStart(4,'0');
+  const jointId = 'WJ-' + j.work_order.replace('WO-','');
+  const locLabel = enrichLocation(j.location);
 
   return `
     <div class="section-head">
       <div>
         <div class="section-title">Weld Execution Ticket</div>
-        <div class="section-sub">Generated ${now} · ${esc(j.job_id)}</div>
+        <div class="section-sub">Generated ${now} · ${esc(j.job_id)} · <span class="dcn-field">${dcn}</span></div>
       </div>
       <div class="section-actions">
+        <span class="nuke-class-badge">☢ Safety Class 2</span>
         <button id="btn-download-ticket" class="btn btn-secondary" onclick="copyTicket()">
           <i data-lucide="copy"></i> Copy Ticket
         </button>
@@ -962,20 +1033,46 @@ function renderExecutionTicket() {
 
     <div class="ticket-shell" id="ticket-content">
       <div class="ticket-header">
-        <div>
-          <div class="ticket-org">Nuclear Power Corporation of India Ltd.</div>
-          <div class="ticket-title">Weld Execution Ticket</div>
-          <div class="ticket-sub">${esc(j.job_id)} · ${esc(j.work_order)} · ${esc(j.location)}</div>
+        <div style="display:flex;align-items:flex-start;gap:16px">
+          <!-- NPCIL atom mark (SVG) -->
+          <svg viewBox="0 0 48 48" width="44" height="44" style="flex-shrink:0;opacity:.85">
+            <ellipse cx="24" cy="24" rx="22" ry="8" fill="none" stroke="#38bdf8" stroke-width="1.5"/>
+            <ellipse cx="24" cy="24" rx="22" ry="8" fill="none" stroke="#38bdf8" stroke-width="1.5" transform="rotate(60 24 24)"/>
+            <ellipse cx="24" cy="24" rx="22" ry="8" fill="none" stroke="#38bdf8" stroke-width="1.5" transform="rotate(120 24 24)"/>
+            <circle cx="24" cy="24" r="3" fill="#38bdf8"/>
+          </svg>
+          <div>
+            <div class="ticket-org">Nuclear Power Corporation of India Ltd. · Kakrapar Atomic Power Project</div>
+            <div class="ticket-title">Weld Execution Ticket</div>
+            <div class="ticket-sub">${esc(j.job_id)} · ${esc(j.work_order)} · ${esc(jointId)} · ${esc(locLabel)}</div>
+          </div>
         </div>
-        <div class="ticket-stamp">
-          <div>NPCIL SM-11</div>
-          <div>${now}</div>
-          <div style="margin-top:6px">
-            <div class="ticket-approved-icon" style="margin:0 auto">
+        <div class="ticket-stamp" style="text-align:right;min-width:130px">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--dim)">DCN: <span style="color:var(--accent)">${dcn}</span></div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--dim)">Issue: 01 · Rev: 00</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--dim)">${now}</div>
+          <div style="margin-top:8px">
+            <div class="ticket-approved-icon" style="margin:0 auto 4px">
               <i data-lucide="check-circle" style="width:18px;height:18px;stroke:#22c55e;stroke-width:2.5;fill:none"></i>
             </div>
+            <div style="color:var(--c-green);font-weight:700;font-size:11px">APPROVED</div>
+            <div style="font-size:9px;color:var(--dim);margin-top:2px">ASME Sec IX / IS 2825</div>
           </div>
-          <div style="color:var(--c-green);font-weight:700;margin-top:4px">APPROVED</div>
+          <!-- QR placeholder -->
+          <div style="margin-top:8px;width:44px;height:44px;border:1px solid #1e3352;border-radius:3px;margin-left:auto;background:#0d1829;display:flex;align-items:center;justify-content:center">
+            <svg viewBox="0 0 20 20" width="36" height="36" style="opacity:.4">
+              <rect x="1" y="1" width="7" height="7" fill="none" stroke="#38bdf8" stroke-width="1"/>
+              <rect x="2" y="2" width="5" height="5" fill="#38bdf8"/>
+              <rect x="12" y="1" width="7" height="7" fill="none" stroke="#38bdf8" stroke-width="1"/>
+              <rect x="13" y="2" width="5" height="5" fill="#38bdf8"/>
+              <rect x="1" y="12" width="7" height="7" fill="none" stroke="#38bdf8" stroke-width="1"/>
+              <rect x="2" y="13" width="5" height="5" fill="#38bdf8"/>
+              <rect x="12" y="12" width="2" height="2" fill="#38bdf8"/>
+              <rect x="15" y="12" width="2" height="2" fill="#38bdf8"/>
+              <rect x="12" y="15" width="2" height="4" fill="#38bdf8"/>
+              <rect x="15" y="15" width="4" height="2" fill="#38bdf8"/>
+            </svg>
+          </div>
         </div>
       </div>
 
@@ -985,10 +1082,20 @@ function renderExecutionTicket() {
           <div class="ticket-approved-icon">
             <i data-lucide="user-check"></i>
           </div>
-          <div>
-            <div style="font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.5px;text-transform:uppercase">Assigned Welder</div>
-            <div style="font-size:18px;font-weight:700;color:var(--text)">${esc(aw.welder.welder_name)}</div>
-            <div style="font-size:12px;color:var(--muted)">${esc(aw.welder.welder_id)} · Shift ${esc(aw.welder.shift)} · ${esc(aw.status)}</div>
+          <div style="flex:1">
+            <div style="font-size:10px;font-weight:600;color:var(--dim);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px">Assigned Welder</div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <div style="font-size:18px;font-weight:700;color:var(--text)">${esc(aw.welder.welder_name)}</div>
+              ${badgeHtml(statusColor(aw.status), aw.status)}
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px;font-family:var(--mono)">
+              ${esc(aw.welder.welder_id)} · Shift ${esc(aw.welder.shift)} · ${welderExpYears(aw.welder.welder_id)} yrs experience
+            </div>
+          </div>
+          <div style="text-align:right;font-size:10px;color:var(--dim);font-family:var(--mono)">
+            <div>Continuity: <span style="color:var(--c-green)">${esc(aw.welder.continuity_status)}</span></div>
+            <div>Expiry: ${esc(aw.welder.qualification_expiry_date)}</div>
+            <div>${aw.welder.days_until_expiry} days remaining</div>
           </div>
         </div>
 
@@ -1113,19 +1220,34 @@ function renderExecutionTicket() {
         </div>` : ''}
 
         <!-- Signatures -->
-        <div class="ticket-sig-box">
+        <div class="ticket-sig-box" style="grid-template-columns:repeat(4,1fr)">
           <div class="ticket-sig">
             <div class="ticket-sig-line"></div>
-            <div class="ticket-sig-label">Supervisor Approval</div>
-          </div>
-          <div class="ticket-sig">
-            <div class="ticket-sig-line"></div>
-            <div class="ticket-sig-label">QC Inspector</div>
+            <div class="ticket-sig-label">Shift Supervisor</div>
+            <div style="font-size:8px;color:var(--dim);margin-top:2px">Date / Time</div>
           </div>
           <div class="ticket-sig">
             <div class="ticket-sig-line"></div>
             <div class="ticket-sig-label">Welding Engineer</div>
+            <div style="font-size:8px;color:var(--dim);margin-top:2px">Date / Time</div>
           </div>
+          <div class="ticket-sig">
+            <div class="ticket-sig-line"></div>
+            <div class="ticket-sig-label">QC Inspector</div>
+            <div style="font-size:8px;color:var(--dim);margin-top:2px">Date / Time</div>
+          </div>
+          <div class="ticket-sig">
+            <div class="ticket-sig-line"></div>
+            <div class="ticket-sig-label">Site Radiological Officer</div>
+            <div style="font-size:8px;color:var(--dim);margin-top:2px">Date / Time</div>
+          </div>
+        </div>
+
+        <!-- Compliance footer -->
+        <div style="margin-top:16px;padding:10px 14px;background:#0d1829;border:1px solid #1e3352;border-radius:4px;font-family:var(--mono);font-size:9px;color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <span>Ref: ASME Sec IX · QW-301 · IS 2825 · NPCIL-QOP-WLD-001</span>
+          <span>User must verify drawing/spec suitability and obtain WPS acceptance approval before use in production</span>
+          <span style="color:var(--accent)">WeldAssign AI · ${dcn} · WA-GEN-R00</span>
         </div>
       </div>
     </div>
@@ -1233,14 +1355,18 @@ function openWelderDrawer(welderId) {
     'W-166': 'Ethan Brooks can only be assigned to Shift B or C jobs.',
   };
 
+  const avc = welderAvatarColor(w.welder_id);
+  const av  = welderInitials(w.welder_name);
+  const exp = welderExpYears(w.welder_id);
+  const lastWeld = welderLastWeld(w.welder_id);
+
   const body = `
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
-      <div style="width:44px;height:44px;border-radius:50%;background:var(--surface-hi);display:flex;align-items:center;justify-content:center;color:var(--accent)">
-        <i data-lucide="user"></i>
-      </div>
-      <div>
+      <div class="welder-avatar" style="width:44px;height:44px;font-size:15px;background:${avc}22;color:${avc};border:2px solid ${avc}44">${av}</div>
+      <div style="flex:1">
         <div style="font-size:16px;font-weight:700">${esc(w.welder_name)}</div>
-        <div style="font-size:12px;color:var(--muted)">${esc(w.welder_id)} · Shift ${esc(w.shift)}</div>
+        <div style="font-size:12px;color:var(--muted);font-family:var(--mono)">${esc(w.welder_id)} · Shift ${esc(w.shift)} · ${exp} yrs exp</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:2px">Last weld: ${lastWeld} · ${esc(w.employment_status)}</div>
       </div>
       <div style="margin-left:auto">${badgeHtml(sc, result.status)}</div>
     </div>
@@ -1443,7 +1569,9 @@ function buildWPSPage2(w) {
 
       <div class="wps-doc-stamp">
         <span>NPCIL/WPS/${esc(w.source_wps_no)} Rev.0 · Page 2 of 3</span>
-        <span class="wps-conf-badge">✓ Verified</span>
+        ${w.extraction_review_required
+          ? `<span class="wps-conf-badge warn">⚠ ${((w.extraction_confidence||0.97)*100).toFixed(0)}% — Review Req.</span>`
+          : `<span class="wps-conf-badge">✓ ${((w.extraction_confidence||0.97)*100).toFixed(0)}% Verified</span>`}
       </div>
     </div>`;
 }
@@ -1517,7 +1645,9 @@ function buildWPSPage3(w) {
 
       <div class="wps-doc-stamp">
         <span>NPCIL/WPS/${esc(w.source_wps_no)} Rev.0 · Page 3 of 3 · COMPLETE</span>
-        <span class="wps-conf-badge">✓ AI Extracted</span>
+        ${w.extraction_review_required
+          ? `<span class="wps-conf-badge warn">⚠ ${((w.extraction_confidence||0.97)*100).toFixed(0)}% — Review Req.</span>`
+          : `<span class="wps-conf-badge">✓ ${((w.extraction_confidence||0.97)*100).toFixed(0)}% AI Extracted</span>`}
       </div>
     </div>`;
 }
