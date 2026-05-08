@@ -1981,10 +1981,28 @@ async function analyzeWPS() {
   const wpsRec = S.data.wps.find(w => w.wps_id === S.selectedJob.wps_id);
   if (!wpsRec) { showToast('No WPS record found for this job', 'warn'); return; }
 
-  await showLoading('📄', 'Analyzing WPS Document', [
-    'Retrieving WPS document…', 'Running AI extraction…', 'Parsing ASME QW-482 fields…',
-    'Validating extraction confidence…', 'Building qualification drivers…',
-  ], 2200);
+  // Realistic AI extraction simulation with querying/correcting friction
+  await showLoading('📄', 'AI Document Analysis', [
+    'Initializing vision model...',
+    'Segmenting WPS document regions...',
+    'Locating Section 1 (Identification)...',
+    'Extracting qualification parameters...',
+    'Reading Section 4 (Base Metals)...',
+    'Low confidence detected in thickness range...',
+    'Re-querying section with enhanced context...',
+    'Correction applied: 19 mm max thickness confirmed.',
+    'Extracting Section 5 (Position & Progression)...',
+    'Scanning Notes & Flags for restrictions...',
+    'Validating cross-references...',
+    'Building qualification drivers...'
+  ], 6500, [
+    'Targeting: source_wps_no', 'Targeting: qualification_status', 'Targeting: supporting_pqr_no',
+    'Confidence: 98.2%', 'Targeting: welding_process_root', 'Targeting: base_material_from',
+    'Targeting: base_material_to', 'Targeting: groove_thickness_max_mm', 'Confidence: 42.1%',
+    'Applying self-correction loop...', 'Confidence: 96.5%', 'Targeting: positions_groove',
+    'Targeting: weld_progression', 'Scanning footnote OCR...', 'Targeting: notes_and_flags',
+    'Confidence: 97.8%', 'Finalizing extraction payload...'
+  ]);
 
   S.wpsRecord = wpsRec;
   S.wpsPage = 1;
