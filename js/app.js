@@ -2018,10 +2018,21 @@ async function runValidation() {
   if (!S.selectedJob || !S.wpsRecord) { showToast('No job or WPS selected', 'warn'); return; }
 
   await showLoading('✓', 'Validating Job Against WPS', [
-    'Checking WPS qualification status…', 'Verifying PQR support…', 'Checking material group compatibility…',
-    'Checking thickness range…', 'Checking position coverage…', 'Checking PWHT alignment…',
-    'Computing validation result…',
-  ], 2400);
+    'Verifying source documentation...',
+    'Checking WPS qualification status...',
+    'Cross-referencing supporting PQRs...',
+    'Validating base material groups...',
+    'Analyzing thickness ranges...',
+    'Checking position coverage...',
+    'Applying footnote constraints...',
+    'Scanning for document contradictions...',
+    'Computing validation result...'
+  ], 3800, [
+    'Check: WPS identity', 'Status: Qualified', 'Support: PQR A (Acceptable)',
+    'Mat: P1 Grp 1/2', 'Thk: 12mm vs 1.5-19mm (PASS)', 'Pos: All vs 3G (PASS)',
+    'Prog: Vertical Uphill', 'Alert: Scanning restriction note QW-403.6',
+    'Detecting constraint violation: max 10mm', 'Finalizing validation matrix...'
+  ]);
 
   S.validationResult = validateJobAgainstWPS(S.selectedJob, S.wpsRecord, S.data.pqr);
   S.qualMappings = [];
@@ -2039,9 +2050,18 @@ async function runQualMapping() {
   if (S.validationResult?.hardFail) { showToast('Cannot proceed — validation has hard failures', 'warn'); return; }
 
   await showLoading('🗂', 'Finding Required Qualification', [
-    'Looking up WPS in qualification mapping table…', 'Resolving preferred ticket…',
-    'Checking alternate ticket conditions…', 'Reviewing engineering review rules…',
-  ], 1600);
+    'Querying qualification matrix...',
+    'Matching P-No and F-No requirements...',
+    'Determining required diameter coverage...',
+    'Evaluating position progression...',
+    'Selecting optimal qualification tickets...',
+    'Building ticket profiles...'
+  ], 3000, [
+    'Matrix scan: 82 tickets', 'Filter: P-No. 1', 'Filter: F-No. 4',
+    'Requirement: FR (Full Range)', 'Requirement: ALL positions',
+    'Match found: Q-SM11-SMAW-P1P1-ALL-FR', 'Alternative: 3G-ONLY (Restricted)',
+    'Mapping complete.'
+  ]);
 
   const { mappings } = findQualificationMappings(S.wpsRecord.wps_id, S.data.qualMapping);
   S.qualMappings = mappings;
@@ -2060,11 +2080,21 @@ async function runMatching() {
   }
 
   await showLoading('👥', 'Matching Welders', [
-    'Loading welder qualification records…', 'Evaluating ticket coverage…',
-    'Checking process compatibility…', 'Checking thickness ranges…',
-    'Checking position coverage…', 'Evaluating continuity and expiry…',
-    'Ranking candidates…',
-  ], 2800);
+    'Retrieving active welder roster...',
+    'Checking current shift schedules...',
+    'Applying disruption overrides...',
+    'Verifying ticket expiration dates...',
+    'Checking 6-month continuity logs...',
+    'Validating data completeness...',
+    'Ranking candidates by constraint weights...',
+    'Generating final assignments...'
+  ], 4500, [
+    'Total pool: 50 welders', 'Active shift: A (12 welders)',
+    'Simulating live disruptions...', 'Filter: Qualified ticket',
+    'Data check: W-153 continuity missing', 'Data check: W-171 PQR missing',
+    'Scoring: Experience weight (0.3)', 'Scoring: Priority weight (0.7)',
+    'Ranking list generated.'
+  ]);
 
   S.matchResult = matchWelders(S.selectedJob, S.wpsRecord, S.data.qualMapping, S.data.qualMatrix, getEffectiveWelders(), S.data.pqr);
   S.exceptions  = detectExceptions(S.data.jobs, S.data.wps, S.data.qualMapping, S.data.pqr);
@@ -2078,6 +2108,15 @@ async function runMatching() {
 
 async function approveWelder(welderId) {
   if (!S.matchResult) return;
+  
+  await showLoading('✓', 'Approving Assignment', [
+    'Generating execution ticket...',
+    'Writing to assignment database...',
+    'Updating welder workload...',
+    'Finalizing...'
+  ], 1500, ['Creating WO-260401', 'Updating status: Assigned', 'Sync complete.']);
+
+  const res = S.matchResult.results.find(r => r.welder.welder_id === welderId);
   const result = S.matchResult.results.find(r => r.welder.welder_id === welderId);
   if (!result) return;
 
