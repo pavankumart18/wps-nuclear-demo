@@ -664,12 +664,7 @@ function renderWPSExtraction() {
           data-action="wps-tab" data-tab="${t.id}">${t.label}</div>`
   ).join('');
 
-  const thumbs = [1,2,3].map(p => `
-    <div class="pdf-thumb ${S.wpsPage === p ? 'active' : ''}"
-         data-action="wps-page" data-page="${p}">
-      <div class="pdf-thumb-doc">${buildThumbContent(p)}</div>
-      <div class="pdf-thumb-label">Page ${p}</div>
-    </div>`).join('');
+  // Removed thumbs as we are now showing the real PDF inline
 
   return `
     <div class="section-head">
@@ -691,11 +686,10 @@ function renderWPSExtraction() {
       </div>` : ''}
 
     <div class="wps-layout">
-      <!-- Left: PDF viewer -->
+      <!-- Left: Real PDF viewer -->
       <div class="pdf-panel">
-        <div class="pdf-thumbs">${thumbs}</div>
-        <div class="pdf-viewer" id="pdf-viewer">
-          ${buildWPSDocPage(wps, S.wpsPage)}
+        <div class="pdf-viewer" id="pdf-viewer" style="padding:0; overflow:hidden; border-radius:var(--radius-lg); height:600px;">
+          <embed src="pdfs/${esc(wps.source_wps_no)}.pdf#view=FitH" type="application/pdf" width="100%" height="100%" style="border:none;" />
         </div>
       </div>
 

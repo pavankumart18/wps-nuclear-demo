@@ -725,11 +725,9 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; color: v
 @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 /* ─── WPS Extraction Layout ─────────────────────────────────────── */
-.wps-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; }
+.wps-layout { display: grid; grid-template-columns: 1fr 400px; gap: 20px; align-items: start; }
 
 .pdf-panel { display: flex; flex-direction: column; gap: 8px; }
-
-.pdf-thumbs { display: flex; flex-direction: column; gap: 6px; }
 
 .pdf-thumb {
   background: #ffffff;
