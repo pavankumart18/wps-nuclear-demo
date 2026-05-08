@@ -362,18 +362,23 @@ function renderIngestionSummary() {
 
 async function runDataIngestion() {
   await showLoading('📊', 'Analyzing Excel Workbook', [
-    'Opening welding_demo_input_data.xlsx…',
-    'Scanning worksheet tabs — Jobs, Welders, WPS, Qualifications…',
-    'Extracting 80 job records from Schedule sheet…',
-    'Parsing 50 welder qualification records…',
-    'Analyzing 12 WPS documents for parameter extraction…',
-    'Cross-referencing qualification matrices…',
-    'Detecting data quality issues…',
-    'Found contradiction: WPS-001 notes conflict with thickness range…',
-    'Found incomplete records: 2 welders missing documentation…',
-    'Building structured decision model…',
-    'Data ingestion complete.',
-  ], 4500);
+    'Opening welding_demo_input_data.xlsx...',
+    'Scanning worksheet tabs — Jobs, Welders, WPS, Qualifications...',
+    'Extracting 80 job records from Schedule sheet...',
+    'Parsing 50 welder qualification records...',
+    'Analyzing 12 WPS documents for parameter extraction...',
+    'Cross-referencing qualification matrices...',
+    'Detecting data quality issues...',
+    'Found contradiction: WPS-001 notes conflict with thickness range...',
+    'Found incomplete records: 2 welders missing documentation...',
+    'Building structured decision model...',
+    'Data ingestion complete.'
+  ], 5500, [
+    'Worksheets found: 5', 'Reading row data...', 'Indexing job queue...',
+    'Validating welder IDs...', 'Parsing QW-482 formats...', 'Checking referential integrity...',
+    'Anomaly detected: W-153 continuity', 'Anomaly detected: W-171 PQR missing',
+    'Analyzing WPS-001 note restrictions...', 'Building in-memory knowledge graph...'
+  ]);
 
   S.dataIngestionDone = true;
   render();
