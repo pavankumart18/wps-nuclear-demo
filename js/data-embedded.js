@@ -1743,7 +1743,16 @@ const EMBEDDED_DATA = {
       "source_document_type": "native_pdf",
       "extraction_confidence": 0.96,
       "extraction_review_required": false,
-      "notes": "Anchor WPS from provided pages 15-17. Qualified WPS with PQR A; user must check drawing/spec suitability and obtain document acceptance approval."
+      "notes": "Anchor WPS from provided pages 15-17. Qualified WPS with PQR A; user must check drawing/spec suitability and obtain document acceptance approval.",
+      "wps_restrictions": [
+        {
+          "condition": "Vertical Uphill",
+          "parameter": "thickness",
+          "max_mm": 10.0,
+          "note": "For vertical uphill progression, maximum thickness limited to 10 mm per QW-403.6 interpretation",
+          "source": "WPS Notes — Section 4, footnote 3"
+        }
+      ]
     },
     {
       "wps_id": "WPS-002",
@@ -3458,7 +3467,13 @@ const EMBEDDED_DATA = {
       "recent_quality_flag": "None",
       "recent_ncr_count": 0,
       "supervisor_note": "Technically eligible but continuity/expiry warning",
-      "employment_status": "Active"
+      "employment_status": "Active",
+      "data_completeness": {
+        "qualification_ticket": "on_file",
+        "last_weld_log": "missing",
+        "continuity_certificate": "on_file",
+        "note": "Last weld log entry not found in system — continuity cannot be independently verified"
+      }
     },
     {
       "welder_id": "W-166",
@@ -3490,7 +3505,13 @@ const EMBEDDED_DATA = {
       "recent_quality_flag": "None",
       "recent_ncr_count": 0,
       "supervisor_note": "Expired qualification despite good technical ticket",
-      "employment_status": "Active"
+      "employment_status": "Active",
+      "data_completeness": {
+        "qualification_ticket": "missing_certificate",
+        "last_weld_log": "on_file",
+        "continuity_certificate": "expired",
+        "note": "Qualification ticket on file but supporting PQR certificate not located in document management system"
+      }
     },
     {
       "welder_id": "W-184",

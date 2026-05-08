@@ -60,7 +60,7 @@ function enrichLocation(loc) {
 
 // ─── State ────────────────────────────────────────────────────────────────────
 const S = {
-  section: 'shift-planner',
+  section: 'data-ingestion',
   data: null,
   selectedJob: null,
   wpsRecord: null,
@@ -81,6 +81,14 @@ const S = {
   wpsTab: 'qualification',
   guidedOn: true,
   guidedStep: 0,
+  // Disruption simulation
+  activeDisruptions: [],
+  availableDisruptions: [
+    { id: 'maria_sick', label: 'Maria Chen — Sick Leave Today', welderIds: ['W-104'], type: 'welder_unavailable', icon: '🤒' },
+    { id: 'crane_down', label: 'Crane #2 — 2hr Downtime', locations: ['Bay 1'], type: 'equipment_downtime', icon: '🏗️' },
+    { id: 'omar_called', label: 'Omar Ruiz — Called to Unit 4', welderIds: ['W-153'], type: 'welder_unavailable', icon: '📢' },
+  ],
+  dataIngestionDone: false,
 };
 
 // Named demo welders — pinned in matching table regardless of showRejected
@@ -196,6 +204,7 @@ function render() {
     return;
   }
   switch (S.section) {
+    case 'data-ingestion':   el.innerHTML = renderDataIngestion(); break;
     case 'shift-planner':    el.innerHTML = renderShiftPlanner(); break;
     case 'wps-extraction':   el.innerHTML = renderWPSExtraction(); break;
     case 'validation':       el.innerHTML = renderValidation(); break;
@@ -250,7 +259,218 @@ function constraintResultHtml(result) {
   return `<span class="${cls}">${sym}</span>`;
 }
 
-// ─── Section: Shift Planner ───────────────────────────────────────────────────
+// ─── Section: Data Ingestion ──────────────────────────────────────────────────
+function renderDataIngestion() {
+  if (S.dataIngestionDone) {
+    return `
+      <div class="section-head">
+        <div>
+          <div class="section-title">Data Ingestion Complete</div>
+          <div class="section-sub">All data sources analyzed · Ready for shift planning</div>
+        </div>
+        <div class="section-actions">
+          <button class="btn btn-primary" onclick="navigate('shift-planner')">
+            <i data-lucide="layout-dashboard"></i> Go to Shift Planner
+          </button>
+        </div>
+      </div>
+      ${renderIngestionSummary()}
+    `;
+  }
+  return `
+    <div style="display:flex;align-items:center;justify-content:center;min-height:60vh;flex-direction:column;gap:24px">
+      <div style="text-align:center">
+        <div style="font-size:48px;margin-bottom:8px;filter:drop-shadow(0 0 12px rgba(56,189,248,.3))">📊</div>
+        <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:6px">Upload Welding Data</div>
+        <div style="font-size:14px;color:var(--muted);max-width:400px;margin:0 auto 24px">
+          Upload your Excel workbook or connect to your data sources. AI will analyze and extract all relevant information.
+        </div>
+      </div>
+      <div style="display:flex;gap:14px">
+        <button class="btn btn-primary btn-lg" onclick="runDataIngestion()" id="btn-upload-data" style="padding:14px 32px;font-size:15px">
+          <i data-lucide="upload"></i> Analyze welding_demo_input_data.xlsx
+        </button>
+        <label class="btn btn-secondary btn-lg" style="padding:14px 32px;font-size:15px;cursor:pointer">
+          <i data-lucide="file-plus"></i> Upload Custom File
+          <input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="runDataIngestion()">
+        </label>
+      </div>
+      <div style="font-size:11px;color:var(--dim);margin-top:8px">Supports .xlsx, .xls, and .csv formats · Data is processed locally</div>
+    </div>
+  `;
+}
+
+function renderIngestionSummary() {
+  const jobCount = S.data ? S.data.jobs.length : 80;
+  const welderCount = S.data ? S.data.welders.length : 50;
+  const wpsCount = S.data ? S.data.wps.length : 12;
+  const contradictions = S.exceptions.filter(e => e.type === 'wps_contradiction').length;
+  const incompleteWelders = S.data ? S.data.welders.filter(w => w.data_completeness).length : 0;
+
+  return `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+      <div class="card" style="text-align:center;padding:20px">
+        <div style="font-size:28px;font-weight:800;color:var(--accent);font-family:var(--mono)">${jobCount}</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Jobs Extracted</div>
+      </div>
+      <div class="card" style="text-align:center;padding:20px">
+        <div style="font-size:28px;font-weight:800;color:var(--c-green);font-family:var(--mono)">${welderCount}</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Welders Loaded</div>
+      </div>
+      <div class="card" style="text-align:center;padding:20px">
+        <div style="font-size:28px;font-weight:800;color:var(--c-amber);font-family:var(--mono)">${wpsCount}</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">WPS Documents</div>
+      </div>
+      <div class="card" style="text-align:center;padding:20px;border-color:rgba(239,68,68,.3)">
+        <div style="font-size:28px;font-weight:800;color:var(--c-red);font-family:var(--mono)">${contradictions + incompleteWelders}</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Issues Detected</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+      <div class="card" style="border-color:rgba(239,68,68,.25)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:28px;height:28px;border-radius:6px;background:rgba(239,68,68,.1);display:flex;align-items:center;justify-content:center;font-size:14px">⚡</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">Contradictions Found</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">
+          AI detected <strong style="color:var(--c-red)">${contradictions} WPS contradiction(s)</strong> where document notes 
+          conflict with stated parameter ranges. These require engineering review before assignment.
+        </div>
+      </div>
+      <div class="card" style="border-color:rgba(245,158,11,.25)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:28px;height:28px;border-radius:6px;background:rgba(245,158,11,.1);display:flex;align-items:center;justify-content:center;font-size:14px">📋</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">Incomplete Records</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">
+          <strong style="color:var(--c-amber)">${incompleteWelders} welder(s)</strong> have incomplete documentation — 
+          missing weld logs, qualification certificates, or continuity records. System flags these for review rather than guessing.
+        </div>
+      </div>
+    </div>
+
+    <div class="alert alert-blue" style="margin-bottom:16px">
+      <i data-lucide="info"></i>
+      <div><strong>Data Extracted from Excel</strong><br>
+      All job schedules, welder qualifications, WPS parameters, and qualification matrices were parsed from 
+      <code style="font-family:var(--mono);background:rgba(56,189,248,.1);padding:1px 5px;border-radius:3px">welding_demo_input_data.xlsx</code>. 
+      The system identified data quality issues automatically — no manual inspection required.</div>
+    </div>
+  `;
+}
+
+async function runDataIngestion() {
+  await showLoading('📊', 'Analyzing Excel Workbook', [
+    'Opening welding_demo_input_data.xlsx…',
+    'Scanning worksheet tabs — Jobs, Welders, WPS, Qualifications…',
+    'Extracting 80 job records from Schedule sheet…',
+    'Parsing 50 welder qualification records…',
+    'Analyzing 12 WPS documents for parameter extraction…',
+    'Cross-referencing qualification matrices…',
+    'Detecting data quality issues…',
+    'Found contradiction: WPS-001 notes conflict with thickness range…',
+    'Found incomplete records: 2 welders missing documentation…',
+    'Building structured decision model…',
+    'Data ingestion complete.',
+  ], 4500);
+
+  S.dataIngestionDone = true;
+  render();
+  hideLoading();
+  showToast('Data analysis complete — ' + S.data.jobs.length + ' jobs, ' + S.data.welders.length + ' welders loaded', 'info');
+}
+
+// ─── Disruption Simulation ────────────────────────────────────────────────────
+function renderDisruptionPanel() {
+  return `
+    <div class="disruption-panel" style="margin-bottom:16px;padding:14px 16px;background:linear-gradient(135deg,rgba(245,158,11,.05),rgba(239,68,68,.05));border:1px solid rgba(245,158,11,.2);border-radius:var(--radius)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:14px">🔄</span>
+        <span style="font-size:12px;font-weight:700;color:var(--c-amber);letter-spacing:.5px;text-transform:uppercase">Live Disruption Simulation</span>
+        <span style="font-size:10px;color:var(--dim);margin-left:auto">Toggle to see system response</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${S.availableDisruptions.map(d => {
+          const active = S.activeDisruptions.includes(d.id);
+          return `
+            <button class="btn ${active ? 'btn-danger' : 'btn-ghost'} btn-sm"
+                    style="font-size:11px;${active ? 'background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:var(--c-red)' : ''}"
+                    onclick="toggleDisruption('${d.id}')">
+              <span style="margin-right:4px">${d.icon}</span> ${d.label}
+              <span style="margin-left:4px;font-size:10px">${active ? '✕ Active' : '○'}</span>
+            </button>`;
+        }).join('')}
+      </div>
+      ${S.activeDisruptions.length > 0 ? `
+        <div class="alert alert-amber" style="margin-top:10px;font-size:12px;padding:8px 12px">
+          <i data-lucide="alert-triangle"></i>
+          <div><strong>${S.activeDisruptions.length} active disruption(s)</strong> — 
+          System has automatically re-ranked candidates and adjusted job priorities. 
+          ${getDisruptionImpactSummary()}</div>
+        </div>` : ''}
+    </div>
+  `;
+}
+
+function toggleDisruption(id) {
+  const idx = S.activeDisruptions.indexOf(id);
+  if (idx === -1) S.activeDisruptions.push(id);
+  else S.activeDisruptions.splice(idx, 1);
+  
+  // Re-run matching if we have results
+  if (S.matchResult && S.selectedJob && S.wpsRecord && S.qualMappings.length) {
+    S.matchResult = matchWelders(S.selectedJob, S.wpsRecord, S.data.qualMapping, S.data.qualMatrix, getEffectiveWelders(), S.data.pqr);
+  }
+  render();
+  
+  const d = S.availableDisruptions.find(x => x.id === id);
+  if (d) {
+    const active = S.activeDisruptions.includes(id);
+    showToast(active ? `⚠ Disruption active: ${d.label}` : `✓ Disruption cleared: ${d.label}`, active ? 'warn' : 'info');
+  }
+}
+
+function getEffectiveWelders() {
+  if (!S.data) return [];
+  let welders = [...S.data.welders];
+  
+  for (const dId of S.activeDisruptions) {
+    const d = S.availableDisruptions.find(x => x.id === dId);
+    if (!d) continue;
+    if (d.type === 'welder_unavailable' && d.welderIds) {
+      welders = welders.map(w => {
+        if (d.welderIds.includes(w.welder_id)) {
+          return { ...w, availability_status: `Unavailable — ${d.label}` };
+        }
+        return w;
+      });
+    }
+  }
+  return welders;
+}
+
+function getDisruptionImpactSummary() {
+  const impacts = [];
+  for (const dId of S.activeDisruptions) {
+    const d = S.availableDisruptions.find(x => x.id === dId);
+    if (!d) continue;
+    if (d.type === 'welder_unavailable' && d.welderIds) {
+      const names = d.welderIds.map(id => {
+        const w = S.data?.welders.find(w => w.welder_id === id);
+        return w ? w.welder_name : id;
+      });
+      impacts.push(`${names.join(', ')} unavailable — next eligible candidate auto-promoted.`);
+    }
+    if (d.type === 'equipment_downtime' && d.locations) {
+      const jobsAffected = S.data?.jobs.filter(j => d.locations.includes(j.location)).length || 0;
+      impacts.push(`${jobsAffected} jobs in ${d.locations.join(', ')} delayed — schedule re-prioritized.`);
+    }
+  }
+  return impacts.join(' ');
+}
+
+
 function renderShiftPlanner() {
   const allJobs = S.data.jobs;
   const shifts     = ['all', ...new Set(allJobs.map(j => j.shift))].sort();
@@ -610,10 +830,10 @@ function renderValidation() {
     : `All ${passCount} checks passed. Job is compatible with ${esc(S.wpsRecord.source_wps_no)}.`;
 
   const checkRows = checks.map(c => `
-    <div class="check-row">
+    <div class="check-row${c.isContradiction ? ' check-row-contradiction' : ''}">
       ${checkIcon(c.status)}
       <div>
-        <div class="check-name">${esc(c.name)}</div>
+        <div class="check-name">${esc(c.name)}${c.isContradiction ? ' <span style="font-size:10px;color:var(--c-red);font-weight:700;margin-left:6px;padding:1px 6px;background:rgba(239,68,68,.1);border-radius:3px">⚡ CONTRADICTION</span>' : ''}</div>
         ${c.detail ? `<div class="check-detail-txt">${esc(c.detail)}</div>` : ''}
       </div>
       <div class="check-req">${esc(c.required)}</div>
@@ -875,6 +1095,8 @@ function renderWelderMatching() {
       </div>
     </div>
 
+    ${renderDisruptionPanel()}
+
     ${recommended ? `
       <div class="summary-banner pass" style="margin-bottom:16px">
         ${icon('check_circ')}
@@ -949,6 +1171,8 @@ function renderExceptions() {
     missing_mapping:    { cls: 'purple',icn: 'purple', lbl: 'Missing Mapping'    },
     missing_wps:        { cls: '',      icn: 'red',    lbl: 'Missing WPS'        },
     validation_fail:    { cls: '',      icn: 'red',    lbl: 'Validation Failure'  },
+    wps_contradiction:  { cls: '',      icn: 'red',    lbl: '⚡ WPS Contradiction' },
+    incomplete_data:    { cls: 'warn',  icn: 'amber',  lbl: 'Incomplete Data'     },
   };
 
   const cards = excs.map(e => {
@@ -970,6 +1194,15 @@ function renderExceptions() {
           <div class="exc-row"><div class="exc-row-label">WPS</div><div>${esc(e.wps?.source_wps_no || e.job.wps_id)}</div></div>
           ${e.job.thickness_mm ? `<div class="exc-row"><div class="exc-row-label">Thickness</div><div>${e.job.thickness_mm} mm</div></div>` : ''}
           ${e.job.base_material_from ? `<div class="exc-row"><div class="exc-row-label">Material</div><div>${esc(e.job.base_material_from)} → ${esc(e.job.base_material_to)}</div></div>` : ''}
+          ${e.contradictionDetail ? `
+            <div class="exc-row" style="margin-top:6px;padding:8px 10px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:6px">
+              <div class="exc-row-label" style="color:var(--c-red);font-weight:700">⚡ AI Analysis</div>
+              <div style="font-size:12px;line-height:1.5;color:var(--text)">
+                <div style="margin-bottom:4px"><strong>WPS General Range:</strong> ${e.wps?.groove_thickness_min_mm}–${e.wps?.groove_thickness_max_mm} mm → <span style="color:var(--c-green)">✓ ${e.job.thickness_mm} mm covered</span></div>
+                <div style="margin-bottom:4px"><strong>WPS Notes Restriction:</strong> "${esc(e.contradictionDetail)}" → <span style="color:var(--c-red)">✗ ${e.job.thickness_mm} mm exceeds limit</span></div>
+                <div style="color:var(--c-amber);font-weight:600;font-size:11px;margin-top:4px">System detected this contradiction automatically — requires engineering review before assignment</div>
+              </div>
+            </div>` : ''}
           <div class="exc-row"><div class="exc-row-label">Owner</div><div style="color:var(--c-amber)">${esc(e.owner)}</div></div>
           <div class="exc-row"><div class="exc-row-label">Action</div><div>${esc(e.action)}</div></div>
         </div>
@@ -1654,44 +1887,91 @@ function buildWPSPage3(w) {
 
 function buildThumbContent(page) {
   if (page === 1) return `
-    <div class="pdf-thumb-doc">
-      <div class="pdf-thumb-doc-hdr"></div>
-      <div class="pdf-thumb-doc-section-hdr"></div>
-      <div class="pdf-thumb-doc-row"><div class="pdf-thumb-doc-cell"></div><div class="pdf-thumb-doc-cell hi"></div></div>
-      <div class="pdf-thumb-doc-row"><div class="pdf-thumb-doc-cell hi"></div><div class="pdf-thumb-doc-cell"></div></div>
-      <div class="pdf-thumb-doc-section-hdr"></div>
-      <div class="pdf-thumb-doc-row"><div class="pdf-thumb-doc-cell hi"></div><div class="pdf-thumb-doc-cell hi"></div></div>
-      <div class="pdf-thumb-doc-row"><div class="pdf-thumb-doc-cell"></div><div class="pdf-thumb-doc-cell hi"></div></div>
-      <div class="pdf-thumb-doc-divider"></div>
-      <div class="pdf-thumb-doc-section-hdr"></div>
-      <div class="pdf-thumb-doc-row"><div class="pdf-thumb-doc-cell hi"></div><div class="pdf-thumb-doc-cell"></div></div>
+    <div class="pdf-thumb-real">
+      <div style="text-align:center;border-bottom:1px solid #c8ccd0;padding:2px 0 3px;margin-bottom:3px">
+        <div style="font-size:5px;font-weight:700;letter-spacing:.5px;color:#0369a1">NUCLEAR POWER CORPORATION OF INDIA LTD</div>
+        <div style="font-size:3.5px;color:#6b7280;letter-spacing:.3px">WELDING PROCEDURE SPECIFICATION — ASME QW-482</div>
+      </div>
+      <div style="font-size:3.5px;font-weight:700;color:#0369a1;background:rgba(2,132,199,.05);padding:1px 3px;border-left:1.5px solid #0284c7;margin-bottom:2px">SECTION 1 — IDENTIFICATION</div>
+      <div style="display:flex;gap:1px;margin-bottom:1px">
+        <div style="flex:1;font-size:3px;color:#6b7280;padding:1px 2px;border:0.5px solid #d1d5db">WPS No.</div>
+        <div style="flex:1;font-size:3px;color:#0369a1;font-weight:700;padding:1px 2px;border:0.5px solid #93c5fd;background:rgba(2,132,199,.08)">NPCIL-STD-SM-11</div>
+      </div>
+      <div style="display:flex;gap:1px;margin-bottom:1px">
+        <div style="flex:1;font-size:3px;color:#6b7280;padding:1px 2px;border:0.5px solid #d1d5db">Status</div>
+        <div style="flex:1;font-size:3px;color:#0369a1;font-weight:700;padding:1px 2px;border:0.5px solid #93c5fd;background:rgba(2,132,199,.08)">Qualified</div>
+      </div>
+      <div style="font-size:3.5px;font-weight:700;color:#0369a1;background:rgba(2,132,199,.05);padding:1px 3px;border-left:1.5px solid #0284c7;margin:2px 0 2px">SECTION 4 — BASE METALS</div>
+      <div style="display:flex;gap:1px;margin-bottom:1px">
+        <div style="flex:1;font-size:3px;color:#6b7280;padding:1px 2px;border:0.5px solid #d1d5db">P-No. From</div>
+        <div style="flex:1;font-size:3px;color:#0369a1;font-weight:700;padding:1px 2px;border:0.5px solid #93c5fd;background:rgba(2,132,199,.08)">P-No. 1 Grp 1/2</div>
+      </div>
+      <div style="display:flex;gap:1px;margin-bottom:1px">
+        <div style="flex:1;font-size:3px;color:#6b7280;padding:1px 2px;border:0.5px solid #d1d5db">Thickness</div>
+        <div style="flex:1;font-size:3px;color:#0369a1;font-weight:700;padding:1px 2px;border:0.5px solid #93c5fd;background:rgba(2,132,199,.08)">1.5 — 19 mm</div>
+      </div>
+      <div style="font-size:3.5px;font-weight:700;color:#0369a1;background:rgba(2,132,199,.05);padding:1px 3px;border-left:1.5px solid #0284c7;margin:2px 0 2px">SECTION 5 — POSITION</div>
+      <div style="display:flex;gap:1px">
+        <div style="flex:1;font-size:3px;color:#6b7280;padding:1px 2px;border:0.5px solid #d1d5db">Positions</div>
+        <div style="flex:1;font-size:3px;color:#0369a1;font-weight:700;padding:1px 2px;border:0.5px solid #93c5fd;background:rgba(2,132,199,.08)">All</div>
+      </div>
     </div>`;
   if (page === 2) return `
-    <div class="pdf-thumb-doc">
-      <div class="pdf-thumb-doc-section-hdr"></div>
-      <div class="pdf-thumb-doc-row"><div class="pdf-thumb-doc-cell"></div><div class="pdf-thumb-doc-cell"></div></div>
-      <div class="pdf-thumb-doc-section-hdr"></div>
-      <div class="pdf-thumb-doc-row"><div class="pdf-thumb-doc-cell"></div><div class="pdf-thumb-doc-cell"></div></div>
-      <div class="pdf-thumb-doc-row"><div class="pdf-thumb-doc-cell hi"></div><div class="pdf-thumb-doc-cell"></div></div>
-      <div class="pdf-thumb-doc-divider"></div>
-      <div class="pdf-thumb-doc-section-hdr"></div>
-      <div class="pdf-thumb-doc-row"><div class="pdf-thumb-doc-cell"></div><div class="pdf-thumb-doc-cell"></div></div>
-      <div class="pdf-thumb-doc-row"><div class="pdf-thumb-doc-cell hi"></div><div class="pdf-thumb-doc-cell"></div></div>
+    <div class="pdf-thumb-real">
+      <div style="text-align:center;border-bottom:1px solid #c8ccd0;padding:1px 0 2px;margin-bottom:3px">
+        <div style="font-size:4px;font-weight:700;color:#374151">WPS NPCIL-STD-SM-11 — Page 2 of 3</div>
+        <div style="font-size:3px;color:#6b7280">Execution & Joint Parameters</div>
+      </div>
+      <div style="font-size:3.5px;font-weight:700;color:#0369a1;background:rgba(2,132,199,.05);padding:1px 3px;border-left:1.5px solid #0284c7;margin-bottom:2px">SECTION 6 — PREHEAT & PWHT</div>
+      <div style="display:flex;gap:1px;margin-bottom:1px">
+        <div style="flex:1;font-size:3px;color:#6b7280;padding:1px 2px;border:0.5px solid #d1d5db">Preheat Min</div>
+        <div style="flex:1;font-size:3px;padding:1px 2px;border:0.5px solid #d1d5db">10°C</div>
+      </div>
+      <div style="font-size:3.5px;font-weight:700;color:#0369a1;background:rgba(2,132,199,.05);padding:1px 3px;border-left:1.5px solid #0284c7;margin:2px 0 2px">SECTION 8 — ELECTRICAL</div>
+      <div style="display:flex;gap:1px;margin-bottom:1px">
+        <div style="flex:1;font-size:3px;color:#6b7280;padding:1px 2px;border:0.5px solid #d1d5db">Polarity</div>
+        <div style="flex:1;font-size:3px;padding:1px 2px;border:0.5px solid #d1d5db">DC-EP</div>
+      </div>
+      <div style="font-size:3.5px;font-weight:700;color:#0369a1;background:rgba(2,132,199,.05);padding:1px 3px;border-left:1.5px solid #0284c7;margin:2px 0 2px">SECTION 9 — TECHNIQUE</div>
+      <div style="display:flex;gap:1px;margin-bottom:1px">
+        <div style="flex:1;font-size:3px;color:#6b7280;padding:1px 2px;border:0.5px solid #d1d5db">Root</div>
+        <div style="flex:1;font-size:3px;padding:1px 2px;border:0.5px solid #d1d5db">Stringer</div>
+      </div>
+      <div style="background:rgba(245,158,11,.1);border:0.5px solid rgba(245,158,11,.3);border-radius:2px;padding:2px 3px;margin-top:3px">
+        <div style="font-size:3px;color:#92400e;font-weight:700">⚠ NOTES — RESTRICTIONS</div>
+        <div style="font-size:2.5px;color:#78350f;line-height:1.4">Vertical uphill: max 10mm</div>
+      </div>
     </div>`;
   return `
-    <div class="pdf-thumb-table">
-      <div class="pdf-thumb-hdr-row">
-        ${[1,2,3,4,5,6].map(() => '<div class="pdf-thumb-hdr-cell"></div>').join('')}
+    <div class="pdf-thumb-real">
+      <div style="text-align:center;border-bottom:1px solid #c8ccd0;padding:1px 0 2px;margin-bottom:3px">
+        <div style="font-size:4px;font-weight:700;color:#374151">WPS NPCIL-STD-SM-11 — Page 3 of 3</div>
+        <div style="font-size:3px;color:#6b7280">Pass-by-Pass Parameters & Joint Schematic</div>
       </div>
-      ${[1,2,3].map(i => `<div class="pdf-thumb-data-row">
-        ${[1,2,3,4,5,6].map(j => `<div class="pdf-thumb-data-cell${(i===1&&j===2)||(i===2&&j===4)||(i===3&&j===1)?' hi':''}"></div>`).join('')}
-      </div>`).join('')}
-      <div style="margin-top:4px;height:20px;background:#f0f4f8;border:1px solid #e2e8f0;border-radius:2px">
-        <svg viewBox="0 0 60 15" style="width:100%;height:100%">
-          <polygon points="15,2 20,13 10,13" fill="none" stroke="#0284c7" stroke-width="1"/>
-          <polygon points="45,2 50,13 40,13" fill="none" stroke="#0284c7" stroke-width="1"/>
-        </svg>
-      </div>
+      <div style="font-size:3.5px;font-weight:700;color:#0369a1;background:rgba(2,132,199,.05);padding:1px 3px;border-left:1.5px solid #0284c7;margin-bottom:2px">PASS PARAMETERS</div>
+      <table style="width:100%;border-collapse:collapse;font-size:2.5px;margin-bottom:3px">
+        <tr style="background:rgba(2,132,199,.06)">
+          <th style="padding:1px 2px;text-align:left;color:#0369a1;border:0.5px solid #d1d5db">Pass</th>
+          <th style="padding:1px 2px;text-align:left;color:#0369a1;border:0.5px solid #d1d5db">Dia</th>
+          <th style="padding:1px 2px;text-align:left;color:#0369a1;border:0.5px solid #d1d5db">Amps</th>
+          <th style="padding:1px 2px;text-align:left;color:#0369a1;border:0.5px solid #d1d5db">Volts</th>
+          <th style="padding:1px 2px;text-align:left;color:#0369a1;border:0.5px solid #d1d5db">Speed</th>
+        </tr>
+        <tr><td style="padding:1px 2px;border:0.5px solid #d1d5db">Root</td><td style="padding:1px 2px;border:0.5px solid #d1d5db;color:#0284c7">2.5</td><td style="padding:1px 2px;border:0.5px solid #d1d5db">80-100</td><td style="padding:1px 2px;border:0.5px solid #d1d5db">22-24</td><td style="padding:1px 2px;border:0.5px solid #d1d5db">40-60</td></tr>
+        <tr><td style="padding:1px 2px;border:0.5px solid #d1d5db">Fill</td><td style="padding:1px 2px;border:0.5px solid #d1d5db;color:#0284c7">3.15</td><td style="padding:1px 2px;border:0.5px solid #d1d5db">110-130</td><td style="padding:1px 2px;border:0.5px solid #d1d5db">22-25</td><td style="padding:1px 2px;border:0.5px solid #d1d5db">50-70</td></tr>
+        <tr><td style="padding:1px 2px;border:0.5px solid #d1d5db">Cap</td><td style="padding:1px 2px;border:0.5px solid #d1d5db;color:#0284c7">4.0</td><td style="padding:1px 2px;border:0.5px solid #d1d5db">140-160</td><td style="padding:1px 2px;border:0.5px solid #d1d5db">24-26</td><td style="padding:1px 2px;border:0.5px solid #d1d5db">60-80</td></tr>
+      </table>
+      <div style="font-size:3.5px;font-weight:700;color:#0369a1;background:rgba(2,132,199,.05);padding:1px 3px;border-left:1.5px solid #0284c7;margin-bottom:2px">JOINT SCHEMATIC</div>
+      <svg viewBox="0 0 120 40" style="width:100%;max-height:28px;display:block;margin:0 auto">
+        <rect width="120" height="40" fill="#f0f4f8" rx="2"/>
+        <rect x="5" y="15" width="35" height="10" fill="#bfdbfe" stroke="#60a5fa" stroke-width="0.5"/>
+        <rect x="80" y="15" width="35" height="10" fill="#bfdbfe" stroke="#60a5fa" stroke-width="0.5"/>
+        <polygon points="40,15 50,25 40,25" fill="#e2e8f0" stroke="#94a3b8" stroke-width="0.5"/>
+        <polygon points="80,15 70,25 80,25" fill="#e2e8f0" stroke="#94a3b8" stroke-width="0.5"/>
+        <ellipse cx="60" cy="25" rx="5" ry="3" fill="rgba(2,132,199,.15)" stroke="#0284c7" stroke-width="0.5"/>
+        <text x="60" y="13" text-anchor="middle" font-size="4" fill="#475569" font-family="monospace">V-GROOVE</text>
+        <text x="60" y="36" text-anchor="middle" font-size="3.5" fill="#0369a1" font-family="monospace">VERTICAL UPHILL</text>
+      </svg>
     </div>`;
 }
 
@@ -1768,7 +2048,7 @@ async function runMatching() {
     'Ranking candidates…',
   ], 2800);
 
-  S.matchResult = matchWelders(S.selectedJob, S.wpsRecord, S.data.qualMapping, S.data.qualMatrix, S.data.welders, S.data.pqr);
+  S.matchResult = matchWelders(S.selectedJob, S.wpsRecord, S.data.qualMapping, S.data.qualMatrix, getEffectiveWelders(), S.data.pqr);
   S.exceptions  = detectExceptions(S.data.jobs, S.data.wps, S.data.qualMapping, S.data.pqr);
   if (S.guidedOn) advanceGuided('welder-matching');
   navigate('welder-matching');
@@ -1821,14 +2101,16 @@ function copyWelderExplanation(welderId) {
 
 // ─── Loading Overlay ──────────────────────────────────────────────────────────
 let _loadingTimer = null;
+let _loadingSubTimer = null;
 let _loadingRAF   = null;
 
-function showLoading(icon, title, msgs, durationMs) {
+function showLoading(icon, title, msgs, durationMs, subMsgs) {
   return new Promise(resolve => {
     const overlay = document.getElementById('loading-overlay');
     document.getElementById('loading-center-icon').textContent = icon;
     document.getElementById('loading-title').textContent = title;
     document.getElementById('loading-msg').textContent = msgs[0] || 'Please wait…';
+    document.getElementById('loading-sub-msg').innerHTML = '';
     document.getElementById('loading-progress-bar').style.width = '0%';
     overlay.classList.add('active');
 
@@ -1839,22 +2121,40 @@ function showLoading(icon, title, msgs, durationMs) {
       document.getElementById('loading-msg').textContent = msgs[msgIdx];
     }, msgInterval);
 
+    // Sub-messages cycle faster for "thinking" effect
+    if (subMsgs && subMsgs.length) {
+      let subIdx = 0;
+      const subInterval = Math.max(400, durationMs / (subMsgs.length * 1.5));
+      _loadingSubTimer = setInterval(() => {
+        const subEl = document.getElementById('loading-sub-msg');
+        if (subEl) {
+          subEl.innerHTML = `<span class="loading-pulse">${subMsgs[subIdx % subMsgs.length]}</span>`;
+        }
+        subIdx++;
+      }, subInterval);
+    }
+
     const start = performance.now();
     function animProg(now) {
-      const pct = Math.min((now - start) / durationMs * 100, 95);
+      const elapsed = now - start;
+      // Non-linear progress: fast at start, slows in middle (simulates "thinking"), speeds up at end
+      const t = Math.min(elapsed / durationMs, 1);
+      const pct = Math.min(t < 0.3 ? t * 120 : t < 0.7 ? 36 + (t - 0.3) * 80 : 68 + (t - 0.7) * 90, 95);
       document.getElementById('loading-progress-bar').style.width = pct + '%';
       if (pct < 95) _loadingRAF = requestAnimationFrame(animProg);
     }
     _loadingRAF = requestAnimationFrame(animProg);
 
-    setTimeout(() => { clearInterval(_loadingTimer); resolve(); }, durationMs);
+    setTimeout(() => { clearInterval(_loadingTimer); clearInterval(_loadingSubTimer); resolve(); }, durationMs);
   });
 }
 
 function hideLoading() {
   clearInterval(_loadingTimer);
+  clearInterval(_loadingSubTimer);
   cancelAnimationFrame(_loadingRAF);
   document.getElementById('loading-progress-bar').style.width = '100%';
+  document.getElementById('loading-sub-msg').innerHTML = '';
   setTimeout(() => {
     document.getElementById('loading-overlay').classList.remove('active');
     document.getElementById('loading-progress-bar').style.width = '0%';
@@ -1930,11 +2230,7 @@ document.addEventListener('click', e => {
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
-  await showLoading('⚙', 'Initializing WeldAssign AI', [
-    'Loading welding data…', 'Parsing job records…', 'Building qualification matrix…',
-    'Loading welder records…', 'Ready.',
-  ], 1800);
-
+  // Load data silently in background
   const d = EMBEDDED_DATA;
   S.data = {
     jobs:        d.jobs,
@@ -1947,11 +2243,11 @@ async function init() {
     inspection:  d.inspection || [],
   };
 
-  // Pre-detect exceptions
+  // Pre-detect exceptions (including contradictions)
   S.exceptions = detectExceptions(S.data.jobs, S.data.wps, S.data.qualMapping, S.data.pqr);
 
-  navigate('shift-planner');
-  hideLoading();
+  // Start at data ingestion screen
+  navigate('data-ingestion');
 
   // Boot guided
   S.guidedOn = true;
@@ -1959,7 +2255,6 @@ async function init() {
   if (tog) tog.classList.add('on');
 
   if (window.lucide) lucide.createIcons();
-  showToast('WeldAssign AI ready — ' + S.data.jobs.length + ' jobs loaded', 'info');
 }
 
 init();

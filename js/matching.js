@@ -155,6 +155,36 @@ function validateJobAgainstWPS(job, wps, pqrs) {
       'jobs.csv → requires_notch_toughness');
   }
 
+  // WPS Restriction (contradiction) detection
+  if (wps.wps_restrictions && wps.wps_restrictions.length > 0) {
+    for (const restriction of wps.wps_restrictions) {
+      if (restriction.parameter === 'thickness' && restriction.condition) {
+        const condApplies = job.required_progression && 
+          job.required_progression.toLowerCase().includes(restriction.condition.toLowerCase());
+        if (condApplies && job.thickness_mm > restriction.max_mm) {
+          // This is the contradiction: WPS range covers it, but restriction note limits it
+          const contradictionDetail = `CONTRADICTION DETECTED: WPS general range covers ${job.thickness_mm} mm ` +
+            `(${wps.groove_thickness_min_mm}–${wps.groove_thickness_max_mm} mm), but WPS notes state ` +
+            `"${restriction.note}". Job thickness ${job.thickness_mm} mm exceeds restriction limit of ${restriction.max_mm} mm ` +
+            `for ${restriction.condition} progression.`;
+          warn('WPS Notes Restriction', 
+            `≤${restriction.max_mm} mm for ${restriction.condition}`,
+            `${job.thickness_mm} mm · ${restriction.condition}`,
+            contradictionDetail,
+            restriction.source || 'WPS Notes');
+          // Mark this as a contradiction for UI display
+          checks[checks.length - 1].isContradiction = true;
+          checks[checks.length - 1].contradictionType = 'thickness_vs_notes';
+        } else if (condApplies && job.thickness_mm <= restriction.max_mm) {
+          pass('WPS Notes Restriction', 
+            `≤${restriction.max_mm} mm for ${restriction.condition}`,
+            `${job.thickness_mm} mm — within restriction limit`,
+            restriction.source || 'WPS Notes');
+        }
+      }
+    }
+  }
+
   return { checks, hardFail };
 }
 
@@ -294,6 +324,20 @@ function evaluateWelder(welder, job, mapping, qualMatrix) {
     warnings.push(`Quality flag: ${welder.recent_quality_flag}`);
   }
 
+  // Data completeness checks
+  if (welder.data_completeness) {
+    const dc = welder.data_completeness;
+    if (dc.last_weld_log === 'missing') {
+      warnings.push(`Incomplete data: Last weld log missing — continuity cannot be independently verified`);
+    }
+    if (dc.qualification_ticket === 'missing_certificate') {
+      warnings.push(`Incomplete data: Supporting qualification certificate not located in document system`);
+    }
+    if (dc.qualification_ticket === 'missing') {
+      hardRejections.push(`Incomplete data: Qualification ticket not found in system`);
+    }
+  }
+
   // Ticket evaluation — find best valid ticket
   const ticketIds = pipeList(welder.active_ticket_ids.replace(/\|/g, '|'));
   let bestTicket = null;
@@ -431,6 +475,16 @@ function buildConstraints(welder, job, mapping, ticket, ticketResult) {
     (!welder.recent_quality_flag || welder.recent_quality_flag === 'None') ? 'pass' : 'warn',
     'welders.csv → recent_quality_flag');
 
+  // Data completeness
+  if (welder.data_completeness) {
+    const dc = welder.data_completeness;
+    const dcOk = dc.last_weld_log !== 'missing' && dc.qualification_ticket !== 'missing_certificate' && dc.qualification_ticket !== 'missing';
+    r('Data Completeness', 'All records on file',
+      dcOk ? 'Complete' : (dc.note || 'Incomplete — records missing'),
+      dcOk ? 'pass' : 'warn',
+      'welders.csv → data_completeness');
+  }
+
   return rows;
 }
 
@@ -495,9 +549,35 @@ function detectExceptions(jobs, wps, qualMapping, pqrs) {
   // Return only the demo exceptions (JOB-004, JOB-005, JOB-008) plus any naturally detected ones
   const demoIds = ['JOB-004', 'JOB-005', 'JOB-008'];
   const demoExcs = exceptions.filter(e => demoIds.includes(e.job.job_id));
+
+  // Also include contradiction exceptions for JOB-001
+  const contradictionExcs = [];
+  for (const job of jobs) {
+    const jobWps = wps.find(w => w.wps_id === job.wps_id);
+    if (jobWps && jobWps.wps_restrictions) {
+      for (const restriction of jobWps.wps_restrictions) {
+        if (restriction.parameter === 'thickness' && restriction.condition) {
+          const condApplies = job.required_progression &&
+            job.required_progression.toLowerCase().includes(restriction.condition.toLowerCase());
+          if (condApplies && job.thickness_mm > restriction.max_mm) {
+            contradictionExcs.push({
+              job, wps: jobWps,
+              reason: `WPS CONTRADICTION: General thickness range covers ${job.thickness_mm} mm (${jobWps.groove_thickness_min_mm}–${jobWps.groove_thickness_max_mm} mm), but WPS notes restrict ${restriction.condition} to max ${restriction.max_mm} mm`,
+              type: 'wps_contradiction',
+              owner: 'Welding Engineering',
+              action: `Review WPS notes restriction for ${restriction.condition}. Confirm whether ${job.thickness_mm} mm is permissible or if job requires alternate WPS without this limitation.`,
+              contradictionDetail: restriction.note
+            });
+          }
+        }
+      }
+    }
+  }
+
+  const allExcs = [...demoExcs, ...contradictionExcs];
   // De-duplicate by job_id + type
   const seen = new Set();
-  return demoExcs.filter(e => {
+  return allExcs.filter(e => {
     const key = `${e.job.job_id}-${e.type}`;
     if (seen.has(key)) return false;
     seen.add(key); return true;
