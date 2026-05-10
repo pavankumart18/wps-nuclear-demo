@@ -376,7 +376,7 @@ async function runDataIngestion() {
   ], 5500, [
     'Worksheets found: 5', 'Reading row data...', 'Indexing job queue...',
     'Validating welder IDs...', 'Parsing QW-482 formats...', 'Checking referential integrity...',
-    'Anomaly detected: W-153 continuity', 'Anomaly detected: W-171 PQR missing',
+    'Anomaly detected: W-153 continuity', 'Anomaly detected: W-171 qualification expired',
     'Analyzing WPS-001 note restrictions...', 'Building in-memory knowledge graph...'
   ]);
 
@@ -509,6 +509,13 @@ function renderShiftPlanner() {
     const tooltip    = wpsRec ? esc(`${wpsRec.source_wps_no} — ${wpsRec.welding_process_root || ''}`) : '';
     const priorityColor = { Critical: 'red', High: 'red', Medium: 'amber', Low: 'gray' }[j.priority] || 'gray';
 
+    // Weld type from the referenced WPS
+    const weldType = wpsRec ? (wpsRec.welding_process_fill && wpsRec.welding_process_fill !== wpsRec.welding_process_root
+      ? wpsRec.welding_process_root + '+' + wpsRec.welding_process_fill.replace(wpsRec.welding_process_root + '+', '')
+      : wpsRec.welding_process_root || '—') : '—';
+    const weldTypeColor = weldType.includes('GTAW') && weldType.includes('SMAW') ? 'purple'
+      : weldType.includes('GTAW') ? 'blue' : weldType.includes('SMAW') ? 'green' : 'gray';
+
     const jointId = 'WJ-' + j.work_order.replace('WO-','');
     const locLabel = enrichLocation(j.location);
 
@@ -532,6 +539,7 @@ function renderShiftPlanner() {
         </td>
         <td class="text-mono" style="font-size:12px">${j.thickness_mm} mm</td>
         <td>${badgeHtml('gray', j.required_position)}</td>
+        <td><span class="badge badge-${weldTypeColor}" style="font-size:10px;letter-spacing:.3px">${esc(weldType)}</span></td>
         <td>${badgeHtml('gray', j.shift)}</td>
         <td>${badgeHtml(priorityColor, j.priority)}</td>
         <td>${badgeHtml(statusColor(j.status), j.status)}</td>
@@ -582,6 +590,7 @@ function renderShiftPlanner() {
             <th>Description</th>
             <th>Thickness</th>
             <th>Position</th>
+            <th>Weld Type</th>
             <th>Shift</th>
             <th>Priority</th>
             <th>Status</th>
@@ -843,7 +852,7 @@ function renderValidation() {
     <div class="section-head">
       <div>
         <div class="section-title">Job-to-WPS Validation</div>
-        <div class="section-sub">${esc(S.selectedJob.job_id)} · ${esc(S.wpsRecord.source_wps_no)}</div>
+        <div class="section-sub">${esc(S.selectedJob.job_id)} · ${esc(S.wpsRecord.source_wps_no)} <span style="font-size:11px;color:var(--dim);margin-left:4px">(Internal ID: ${esc(S.wpsRecord.wps_id)} → Source: ${esc(S.wpsRecord.source_wps_no)})</span></div>
       </div>
       <div class="section-actions">
         ${hardFail
@@ -1170,6 +1179,7 @@ function renderExceptions() {
     missing_mapping:    { cls: 'purple',icn: 'purple', lbl: 'Missing Mapping'    },
     missing_wps:        { cls: '',      icn: 'red',    lbl: 'Missing WPS'        },
     validation_fail:    { cls: '',      icn: 'red',    lbl: 'Validation Failure'  },
+    unqualified_wps:    { cls: 'warn',  icn: 'amber',  lbl: 'Unqualified WPS'     },
     wps_contradiction:  { cls: '',      icn: 'red',    lbl: '⚡ WPS Contradiction' },
     incomplete_data:    { cls: 'warn',  icn: 'amber',  lbl: 'Incomplete Data'     },
   };
@@ -1200,6 +1210,19 @@ function renderExceptions() {
                 <div style="margin-bottom:4px"><strong>WPS General Range:</strong> ${e.wps?.groove_thickness_min_mm}–${e.wps?.groove_thickness_max_mm} mm → <span style="color:var(--c-green)">✓ ${e.job.thickness_mm} mm covered</span></div>
                 <div style="margin-bottom:4px"><strong>WPS Notes Restriction:</strong> "${esc(e.contradictionDetail)}" → <span style="color:var(--c-red)">✗ ${e.job.thickness_mm} mm exceeds limit</span></div>
                 <div style="color:var(--c-amber);font-weight:600;font-size:11px;margin-top:4px">System detected this contradiction automatically — requires engineering review before assignment</div>
+              </div>
+            </div>` : ''}
+          ${e.suggestedWps && e.suggestedWps.length > 0 ? `
+            <div class="exc-row" style="margin-top:6px;padding:8px 10px;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);border-radius:6px">
+              <div class="exc-row-label" style="color:var(--accent);font-weight:700">🤖 AI WPS Suggestion</div>
+              <div style="font-size:12px;line-height:1.5;color:var(--text)">
+                <div style="margin-bottom:6px">Job <strong>${esc(e.job.job_id)}</strong> references incorrect WPS. AI found <strong>${e.suggestedWps.length} applicable WPS</strong>:</div>
+                ${e.suggestedWps.map(sw => `
+                  <div style="display:flex;align-items:center;gap:8px;padding:4px 8px;background:rgba(56,189,248,.05);border-radius:4px;margin-bottom:3px">
+                    <span style="font-weight:700;color:var(--accent);font-family:var(--mono);font-size:11px">${esc(sw.wps_id)}</span>
+                    <span style="color:var(--muted);font-size:11px">${esc(sw.source_wps_no)} · ${esc(sw.welding_process_root)} · ${esc(sw.base_material_from)}→${esc(sw.base_material_to)} · ${sw.groove_thickness_min_mm}–${sw.groove_thickness_max_mm} mm</span>
+                    <span class="badge badge-green" style="font-size:9px;margin-left:auto">✓ Compatible</span>
+                  </div>`).join('')}
               </div>
             </div>` : ''}
           <div class="exc-row"><div class="exc-row-label">Owner</div><div style="color:var(--c-amber)">${esc(e.owner)}</div></div>
@@ -2090,7 +2113,7 @@ async function runMatching() {
   ], 4500, [
     'Total pool: 50 welders', 'Active shift: A (12 welders)',
     'Simulating live disruptions...', 'Filter: Qualified ticket',
-    'Data check: W-153 continuity missing', 'Data check: W-171 PQR missing',
+    'Data check: W-153 continuity missing', 'Data check: W-171 cert missing',
     'Scoring: Experience weight (0.3)', 'Scoring: Priority weight (0.7)',
     'Ranking list generated.'
   ]);
@@ -2299,8 +2322,11 @@ async function init() {
     inspection:  d.inspection || [],
   };
 
-  // Pre-detect exceptions (including contradictions)
+  // Pre-detect exceptions (including contradictions) — now checks ALL jobs
   S.exceptions = detectExceptions(S.data.jobs, S.data.wps, S.data.qualMapping, S.data.pqr);
+
+  // Update job statuses based on detected exceptions
+  applyExceptionStatuses(S.data.jobs, S.exceptions);
 
   // Start at data ingestion screen
   navigate('data-ingestion');

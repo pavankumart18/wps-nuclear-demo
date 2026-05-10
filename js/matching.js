@@ -331,7 +331,7 @@ function evaluateWelder(welder, job, mapping, qualMatrix) {
       warnings.push(`Incomplete data: Last weld log missing — continuity cannot be independently verified`);
     }
     if (dc.qualification_ticket === 'missing_certificate') {
-      warnings.push(`Incomplete data: Supporting qualification certificate not located in document system`);
+      warnings.push(`Incomplete data: Qualification certificate copy not located in document system`);
     }
     if (dc.qualification_ticket === 'missing') {
       hardRejections.push(`Incomplete data: Qualification ticket not found in system`);
@@ -508,6 +508,34 @@ function matchWelders(job, wps, qualMapping, qualMatrix, welders, pqrs) {
 
 // ─── Exception detection ──────────────────────────────────────────────────────
 
+/** Find the best alternate WPS for a job when the referenced WPS doesn't match */
+function findCorrectWPS(job, allWps) {
+  const candidates = allWps.filter(w => {
+    // Must match material group
+    if (w.base_material_from !== job.base_material_from || w.base_material_to !== job.base_material_to) return false;
+    // Must be qualified
+    if (w.qualification_status !== 'Qualified') return false;
+    // Must cover thickness
+    if (job.thickness_mm < w.groove_thickness_min_mm || job.thickness_mm > w.groove_thickness_max_mm) return false;
+    // Must not be the same broken WPS
+    if (w.wps_id === job.wps_id) return false;
+    return true;
+  });
+  // Check for restriction violations on candidates too
+  return candidates.filter(w => {
+    if (w.wps_restrictions) {
+      for (const r of w.wps_restrictions) {
+        if (r.parameter === 'thickness' && r.condition) {
+          const condApplies = job.required_progression &&
+            job.required_progression.toLowerCase().includes(r.condition.toLowerCase());
+          if (condApplies && job.thickness_mm > r.max_mm) return false;
+        }
+      }
+    }
+    return true;
+  });
+}
+
 function detectExceptions(jobs, wps, qualMapping, pqrs) {
   const exceptions = [];
 
@@ -530,28 +558,41 @@ function detectExceptions(jobs, wps, qualMapping, pqrs) {
       failedChecks.forEach(fc => {
         const isMaterial = fc.name === 'Base Material Group';
         const isThickness = fc.name === 'Thickness Range';
+        const isQualStatus = fc.name === 'WPS Qualification Status';
+
+        // For material mismatches and thickness issues, try to find the correct WPS
+        const suggestedWps = (isMaterial || isThickness) ? findCorrectWPS(job, wps) : [];
+        const suggestion = suggestedWps.length > 0
+          ? `AI found ${suggestedWps.length} applicable WPS: ${suggestedWps.map(w => w.wps_id + ' (' + w.source_wps_no + ', ' + w.welding_process_root + ', ' + w.base_material_from + '→' + w.base_material_to + ', ' + w.groove_thickness_min_mm + '–' + w.groove_thickness_max_mm + ' mm)').join('; ')}`
+          : null;
+
+        let action;
+        if (isThickness) {
+          action = suggestion
+            ? `Job references incorrect WPS for ${job.thickness_mm} mm. ${suggestion}`
+            : `No qualified WPS found covering ${job.thickness_mm} mm. Obtain qualified WPS or redesign joint.`;
+        } else if (isMaterial) {
+          action = suggestion
+            ? `Job references incorrect WPS (${jobWps.source_wps_no} covers ${jobWps.base_material_from}→${jobWps.base_material_to}). ${suggestion}`
+            : `Assign a WPS qualified for ${job.base_material_from} → ${job.base_material_to}.`;
+        } else {
+          action = 'Review with welding engineering.';
+        }
+
         exceptions.push({
           job, wps: jobWps,
           reason: fc.detail || `${fc.name} failed: ${fc.actual}`,
-          type: isThickness ? 'thickness_exceeded' : isMaterial ? 'material_mismatch' : 'validation_fail',
+          type: isThickness ? 'thickness_exceeded' : isMaterial ? 'material_mismatch' : isQualStatus ? 'unqualified_wps' : 'validation_fail',
           owner: isMaterial ? 'Welding Engineering' : isThickness ? 'Welding Engineering / Planning' : 'Welding Engineering',
-          action: isThickness
-            ? `Obtain qualified WPS covering ${job.thickness_mm} mm thickness, or redesign joint.`
-            : isMaterial
-            ? `Assign a WPS qualified for ${job.base_material_from} → ${job.base_material_to} (e.g. WPS-004 for P8/P8 SMAW).`
-            : 'Review with welding engineering.',
-          check: fc
+          action: action,
+          check: fc,
+          suggestedWps: suggestedWps
         });
       });
     }
   }
 
-  // Return only the demo exceptions (JOB-004, JOB-005, JOB-008) plus any naturally detected ones
-  const demoIds = ['JOB-004', 'JOB-005', 'JOB-008'];
-  const demoExcs = exceptions.filter(e => demoIds.includes(e.job.job_id));
-
-  // Also include contradiction exceptions for JOB-001
-  const contradictionExcs = [];
+  // Also include contradiction exceptions — WPS notes that conflict with general ranges
   for (const job of jobs) {
     const jobWps = wps.find(w => w.wps_id === job.wps_id);
     if (jobWps && jobWps.wps_restrictions) {
@@ -560,13 +601,20 @@ function detectExceptions(jobs, wps, qualMapping, pqrs) {
           const condApplies = job.required_progression &&
             job.required_progression.toLowerCase().includes(restriction.condition.toLowerCase());
           if (condApplies && job.thickness_mm > restriction.max_mm) {
-            contradictionExcs.push({
+            // For contradictions, also suggest alternate WPS without the restriction
+            const altWps = findCorrectWPS(job, wps);
+            const suggestion = altWps.length > 0
+              ? `AI found ${altWps.length} alternate WPS without this restriction: ${altWps.map(w => w.wps_id + ' (' + w.source_wps_no + ')').join(', ')}`
+              : 'No alternate WPS found without this restriction.';
+
+            exceptions.push({
               job, wps: jobWps,
               reason: `WPS CONTRADICTION: General thickness range covers ${job.thickness_mm} mm (${jobWps.groove_thickness_min_mm}–${jobWps.groove_thickness_max_mm} mm), but WPS notes restrict ${restriction.condition} to max ${restriction.max_mm} mm`,
               type: 'wps_contradiction',
               owner: 'Welding Engineering',
-              action: `Review WPS notes restriction for ${restriction.condition}. Confirm whether ${job.thickness_mm} mm is permissible or if job requires alternate WPS without this limitation.`,
-              contradictionDetail: restriction.note
+              action: `Review WPS notes restriction for ${restriction.condition}. ${suggestion}`,
+              contradictionDetail: restriction.note,
+              suggestedWps: altWps
             });
           }
         }
@@ -574,12 +622,22 @@ function detectExceptions(jobs, wps, qualMapping, pqrs) {
     }
   }
 
-  const allExcs = [...demoExcs, ...contradictionExcs];
+  // Include all exceptions — no demo-only filtering
   // De-duplicate by job_id + type
   const seen = new Set();
-  return allExcs.filter(e => {
+  return exceptions.filter(e => {
     const key = `${e.job.job_id}-${e.type}`;
     if (seen.has(key)) return false;
     seen.add(key); return true;
   });
+}
+
+/** Update job statuses based on detected exceptions */
+function applyExceptionStatuses(jobs, exceptions) {
+  const exceptionJobIds = new Set(exceptions.map(e => e.job.job_id));
+  for (const job of jobs) {
+    if (exceptionJobIds.has(job.job_id) && job.status === 'Needs assignment') {
+      job.status = 'Needs review';
+    }
+  }
 }
